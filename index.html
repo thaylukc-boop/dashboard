@@ -683,13 +683,13 @@
 <nav>
   <div class="nav-brand">Thayná <span>Ingrid</span></div>
   <ul class="nav-links">
-    <li><a href="#" class="active" onclick="showPage('visao-geral', this)">Visão Geral</a></li>
-    <li><a href="#" onclick="showPage('vendas', this)">Vendas</a></li>
-    <li><a href="#" onclick="showPage('leads', this)">Leads</a></li>
-    <li><a href="#" onclick="showPage('comparativos', this)">Comparativos</a></li>
-    <li><a href="#" onclick="showPage('alertas', this)">Alertas</a></li>
-    <li><a href="#" onclick="showPage('importar', this)">Importar CSV</a></li>
-    <li><a href="#" onclick="showPage('config', this)">Config</a></li>
+    <li><a href="javascript:void(0)" class="active" onclick="showPage('visao-geral', this)">Visão Geral</a></li>
+    <li><a href="javascript:void(0)" onclick="showPage('vendas', this)">Vendas</a></li>
+    <li><a href="javascript:void(0)" onclick="showPage('leads', this)">Leads</a></li>
+    <li><a href="javascript:void(0)" onclick="showPage('comparativos', this)">Comparativos</a></li>
+    <li><a href="javascript:void(0)" onclick="showPage('alertas', this)">Alertas</a></li>
+    <li><a href="javascript:void(0)" onclick="showPage('importar', this)">Importar CSV</a></li>
+    <li><a href="javascript:void(0)" onclick="showPage('config', this)">Config</a></li>
   </ul>
   <div class="nav-faturado">Faturado no mês <strong id="nav-faturado">R$ 0,00</strong></div>
 </nav>
@@ -1655,8 +1655,4 @@ function renderComparativos(aprovadas) {
 function renderGraficoSemanas(aprovadas) {
   destroyChart('semanas');
   const ctx = document.getElementById('chart-semanas').getContext('2d');
-  if (aprovadas.length === 0) return;
-
-  const semanas = {};
-  aprovadas.forEach(v => {
-    if (!(v.data instanceof Date) || isNaN(v.da
+  if (aprovadas.
