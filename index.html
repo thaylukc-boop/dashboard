@@ -685,6 +685,7 @@
   <ul class="nav-links">
     <li><a href="#" class="active" onclick="showPage('visao-geral', this)">Visão Geral</a></li>
     <li><a href="#" onclick="showPage('vendas', this)">Vendas</a></li>
+    <li><a href="#" onclick="showPage('leads', this)">Leads</a></li>
     <li><a href="#" onclick="showPage('comparativos', this)">Comparativos</a></li>
     <li><a href="#" onclick="showPage('alertas', this)">Alertas</a></li>
     <li><a href="#" onclick="showPage('importar', this)">Importar CSV</a></li>
@@ -965,6 +966,76 @@
   </div>
 </div>
 
+<!-- ======================== LEADS ======================== -->
+<div class="page" id="page-leads">
+  <div class="page-header">
+    <h1>Seus <span>Leads</span></h1>
+    <p>Quem comprou e quem ainda não comprou</p>
+  </div>
+
+  <!-- KPIs Leads -->
+  <div class="grid-3" style="margin-bottom:1.5rem">
+    <div class="card card-accent">
+      <div class="card-label">✅ Compraram</div>
+      <div class="card-value" id="leads-compraram">0</div>
+      <div class="card-sub">clientes ativos</div>
+    </div>
+    <div class="card card-accent">
+      <div class="card-label">🛒 Não Compraram</div>
+      <div class="card-value" id="leads-nao-compraram">0</div>
+      <div class="card-sub">oportunidade de recuperação</div>
+    </div>
+    <div class="card card-accent">
+      <div class="card-label">📊 Taxa de Conversão</div>
+      <div class="card-value" id="leads-tx-conv">0%</div>
+      <div class="card-sub">leads que viraram clientes</div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card">
+    <div class="header-row" style="margin-bottom:1rem">
+      <div class="section-title" style="margin-bottom:0;border:none;">Todos os contatos</div>
+      <div style="display:flex;gap:0.5rem;align-items:center">
+        <input type="text" id="leads-search" placeholder="Buscar nome ou email…" oninput="renderLeads()"
+          style="padding:0.4rem 0.8rem;border:1px solid var(--border);border-radius:8px;font-size:0.8rem;font-family:'Inter',sans-serif;outline:none;background:var(--cream);color:var(--black);width:200px">
+        <select class="periodo-select" id="leads-filter" onchange="renderLeads()">
+          <option value="todos">Todos</option>
+          <option value="comprou">Compraram</option>
+          <option value="nao-comprou">Não compraram</option>
+          <option value="reembolso">Reembolso</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="data-table" id="tabela-leads">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Celular</th>
+            <th>Produto</th>
+            <th>Valor</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-leads">
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="icon">👥</div>
+                <h3>Nenhum lead ainda</h3>
+                <p>Importe o CSV da Kiwify para ver seus leads</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <!-- ======================== IMPORTAR ======================== -->
 <div class="page" id="page-importar">
   <div class="page-header">
@@ -1083,108 +1154,152 @@ function limparDados() {
 }
 
 // ══════════════════════════════════════════════════
-// CSV PARSER
+// CSV PARSER — KIWIFY COMPATIBLE
 // ══════════════════════════════════════════════════
+function parseCSVLine(line, sep) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === sep && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
 function handleFiles(files) {
   Array.from(files).forEach(file => {
     const reader = new FileReader();
     reader.onload = e => {
-      const text = e.target.result;
-      const linhas = text.trim().split('\n');
+      // remove BOM se existir
+      let text = e.target.result.replace(/^﻿/, '');
+      const linhas = text.trim().split(/\r?\n/);
       if (linhas.length < 2) return;
 
-      const sep = linhas[0].includes(';') ? ';' : ',';
-      const headers = linhas[0].split(sep).map(h => h.trim().replace(/"/g,'').toLowerCase());
+      // detectar separador
+      const primeiraLinha = linhas[0];
+      const sep = (primeiraLinha.split(';').length > primeiraLinha.split(',').length) ? ';' : ',';
 
-      const rows = linhas.slice(1).map(l => {
-        const vals = l.split(sep).map(v => v.trim().replace(/^"|"$/g,''));
-        const obj = {};
-        headers.forEach((h, i) => obj[h] = vals[i] || '');
-        return obj;
-      }).filter(r => Object.values(r).some(v => v));
-
-      // detectar tipo
-      const isCarrinho = headers.some(h =>
-        h.includes('abandon') || h.includes('carrinho') || h.includes('cart')
+      const headers = parseCSVLine(primeiraLinha, sep).map(h =>
+        h.replace(/"/g,'').trim().toLowerCase()
+          .normalize('NFD').replace(/[̀-ͯ]/g,'') // remove acentos
       );
+
+      const rows = linhas.slice(1)
+        .filter(l => l.trim())
+        .map(l => {
+          const vals = parseCSVLine(l, sep);
+          const obj = {};
+          headers.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g,'').trim());
+          return obj;
+        })
+        .filter(r => Object.values(r).some(v => v));
+
+      // detectar tipo pelo nome do arquivo ou por colunas
+      const nomeArq = file.name.toLowerCase();
+      const isCarrinho = nomeArq.includes('carrinho') || nomeArq.includes('abandon') || nomeArq.includes('cart') ||
+        headers.some(h => h.includes('abandon') || h.includes('carrinho'));
 
       if (isCarrinho) {
         const parsed = rows.map(r => parseCarrinho(r, headers));
         state.carrinhos = [...state.carrinhos, ...parsed];
-        toast(`${parsed.length} carrinhos importados`);
+        toast(`${parsed.length} carrinhos importados ✓`);
       } else {
         const parsed = rows.map(r => parseVenda(r, headers));
         state.vendas = [...state.vendas, ...parsed];
-        toast(`${parsed.length} vendas importadas`);
+        toast(`${parsed.length} vendas importadas ✓`);
       }
 
       atualizarDashboard();
-      mostrarLog(file.name, rows.length, isCarrinho);
+      mostrarLog(file.name, rows.length, isCarrinho, headers);
     };
     reader.readAsText(file, 'UTF-8');
   });
 }
 
+// busca coluna flexível: sem acento, substring
 function findCol(row, headers, candidates) {
-  const found = candidates.find(c => headers.some(h => h.includes(c)));
-  if (!found) return '';
-  const key = headers.find(h => h.includes(found));
-  return row[key] || '';
+  for (const c of candidates) {
+    const key = headers.find(h => h.includes(c));
+    if (key && row[key] !== undefined && row[key] !== '') return row[key];
+  }
+  return '';
+}
+
+function parseStatus(raw) {
+  const s = (raw || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  if (s === 'paid' || s.includes('aprovado') || s.includes('aprovada') || s.includes('complete') || s.includes('conclu')) return 'approved';
+  if (s === 'refused' || s.includes('refus') || s.includes('recusad') || s.includes('declin') || s.includes('falh') || s.includes('cancelad')) return 'abandoned';
+  if (s.includes('reembolso') || s.includes('reembolsado') || s.includes('refund') || s.includes('chargeback') || s.includes('estorno')) return 'refunded';
+  if (s === 'waiting' || s.includes('aguard') || s.includes('pend') || s.includes('processing') || s.includes('wait')) return 'pending';
+  if (s.includes('abandon') || s.includes('nao finaliz')) return 'abandoned';
+  return 'pending'; // padrão seguro
 }
 
 function parseVenda(row, headers) {
-  const valor_raw = findCol(row, headers, ['valor', 'value', 'price', 'amount', 'total']) || '0';
+  // Kiwify: "Valor líquido" → normalizado "valor liquido"
+  const valor_raw = findCol(row, headers, ['valor liquido','preco base','total com','valor bruto','valor','value','price','amount','total','receita']) || '0';
   const valor = parseFloat(valor_raw.replace(/[^0-9,.]/g,'').replace(',','.')) || 0;
 
-  const data_raw = findCol(row, headers, ['data', 'date', 'created', 'criado', 'hora']);
+  // Kiwify: "Data de Criação" → normalizado "data de criacao"
+  const data_raw = findCol(row, headers, ['data de criacao','data criacao','criado em','data da venda','creation date','data','created','date','hora']);
   const data = parseData(data_raw);
 
-  const status_raw = findCol(row, headers, ['status', 'situacao', 'situação']).toLowerCase();
-  let status = 'approved';
-  if (status_raw.includes('abandon') || status_raw.includes('cancelad')) status = 'abandoned';
-  else if (status_raw.includes('reembolso') || status_raw.includes('refund') || status_raw.includes('chargeback')) status = 'refunded';
-  else if (status_raw.includes('pend') || status_raw.includes('aguard')) status = 'pending';
+  // Kiwify: "Status" com valores "paid", "refused", "waiting", "refunded"
+  const status_raw = findCol(row, headers, ['status']);
+  const status = parseStatus(status_raw);
 
-  return {
-    data,
-    produto: findCol(row, headers, ['produto', 'product', 'item', 'plano', 'plan']) || 'Produto',
-    comprador: findCol(row, headers, ['nome', 'name', 'comprador', 'buyer', 'cliente']),
-    email: findCol(row, headers, ['email', 'e-mail']),
-    valor,
-    status,
-    pagamento: findCol(row, headers, ['pagamento', 'payment', 'forma', 'metodo'])
-  };
+  // Kiwify: "Produto", "Cliente"
+  const produto = findCol(row, headers, ['produto','product name','product','plano','plan','item','nome do produto']) || 'Produto';
+  const comprador = findCol(row, headers, ['cliente','customer name','nome do comprador','nome do cliente','comprador','nome','name','buyer']);
+  const email = findCol(row, headers, ['email','customer email','e-mail','mail']);
+  const pagamento = findCol(row, headers, ['pagamento','payment','metodo','forma de pagamento','tipo']);
+  const celular = findCol(row, headers, ['celular','phone','telefone','customer phone']);
+  const instagram = findCol(row, headers, ['instagram']);
+
+  return { data, produto, comprador, email, valor, status, pagamento, celular, instagram };
 }
 
 function parseCarrinho(row, headers) {
-  const data_raw = findCol(row, headers, ['data', 'date', 'created', 'criado']);
-  return {
-    data: parseData(data_raw),
-    produto: findCol(row, headers, ['produto', 'product', 'item', 'plano']) || 'Produto',
-    nome: findCol(row, headers, ['nome', 'name', 'comprador']),
-    email: findCol(row, headers, ['email', 'e-mail']),
-    status: 'abandoned'
-  };
+  // Kiwify carts: "Product name", "Customer Name", "Customer Email", "Creation Date"
+  const data_raw = findCol(row, headers, ['creation date','criado em','data','date','created']);
+  const produto = findCol(row, headers, ['product name','produto','product','plano','item']) || 'Produto';
+  const nome = findCol(row, headers, ['customer name','nome','name','comprador','cliente']);
+  const email = findCol(row, headers, ['customer email','email','e-mail','mail']);
+  const celular = findCol(row, headers, ['customer phone','celular','phone','telefone']);
+  return { data: parseData(data_raw), produto, nome, comprador: nome, email, celular, valor: 0, status: 'abandoned' };
 }
 
 function parseData(str) {
   if (!str) return new Date();
   const limpo = str.replace(/"/g,'').trim();
-  // dd/mm/yyyy
+  // dd/mm/yyyy hh:mm ou dd/mm/yyyy
   const m1 = limpo.match(/(\d{2})\/(\d{2})\/(\d{4})/);
   if (m1) return new Date(`${m1[3]}-${m1[2]}-${m1[1]}`);
   // yyyy-mm-dd
   const m2 = limpo.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (m2) return new Date(limpo);
+  if (m2) return new Date(limpo.slice(0,10));
+  // dd-mm-yyyy
+  const m3 = limpo.match(/(\d{2})-(\d{2})-(\d{4})/);
+  if (m3) return new Date(`${m3[3]}-${m3[2]}-${m3[1]}`);
   return new Date();
 }
 
-function mostrarLog(nome, qtd, isCarrinho) {
+function mostrarLog(nome, qtd, isCarrinho, headers) {
   const logEl = document.getElementById('import-log');
   const content = document.getElementById('import-log-content');
   logEl.style.display = 'block';
   const tipo = isCarrinho ? 'carrinhos abandonados' : 'vendas';
-  content.innerHTML += `✅ <strong>${nome}</strong> — ${qtd} linhas importadas como <em>${tipo}</em><br>`;
+  content.innerHTML += `✅ <strong>${nome}</strong> — ${qtd} linhas como <em>${tipo}</em> · Colunas: ${headers.slice(0,5).join(', ')}…<br>`;
 }
 
 // ══════════════════════════════════════════════════
@@ -1263,6 +1378,103 @@ function atualizarDashboard() {
   renderComparativos(aprovadas);
   renderAlertas(sorted, faturamento, totalAbandonados, aprovadas);
   renderTabelaVendas();
+  renderLeads();
+}
+
+// ══════════════════════════════════════════════════
+// LEADS
+// ══════════════════════════════════════════════════
+function renderLeads() {
+  const busca = (document.getElementById('leads-search')?.value || '').toLowerCase();
+  const filtro = document.getElementById('leads-filter')?.value || 'todos';
+
+  // juntar todos os contatos: aprovadas + pendentes + abandonadas + carrinhos
+  const todosContatos = [
+    ...state.vendas,
+    ...state.carrinhos
+  ];
+
+  // deduplicar por email (prioriza aprovados)
+  const mapaEmail = {};
+  todosContatos.forEach(c => {
+    const chave = (c.email || c.comprador || Math.random()).toString().toLowerCase();
+    if (!mapaEmail[chave]) {
+      mapaEmail[chave] = c;
+    } else {
+      // se já existe, manter o aprovado
+      if (c.status === 'approved') mapaEmail[chave] = c;
+    }
+  });
+
+  let lista = Object.values(mapaEmail);
+
+  // KPIs
+  const compraram = lista.filter(l => l.status === 'approved').length;
+  const naoCompraram = lista.filter(l => l.status !== 'approved' && l.status !== 'refunded').length;
+  const txConv = lista.length > 0 ? Math.round((compraram / lista.length) * 100) : 0;
+  document.getElementById('leads-compraram').textContent = compraram;
+  document.getElementById('leads-nao-compraram').textContent = naoCompraram;
+  document.getElementById('leads-tx-conv').textContent = txConv + '%';
+
+  // filtrar
+  if (filtro === 'comprou') lista = lista.filter(l => l.status === 'approved');
+  else if (filtro === 'nao-comprou') lista = lista.filter(l => l.status !== 'approved' && l.status !== 'refunded');
+  else if (filtro === 'reembolso') lista = lista.filter(l => l.status === 'refunded');
+
+  // busca
+  if (busca) {
+    lista = lista.filter(l =>
+      (l.comprador || l.nome || '').toLowerCase().includes(busca) ||
+      (l.email || '').toLowerCase().includes(busca) ||
+      (l.produto || '').toLowerCase().includes(busca)
+    );
+  }
+
+  // ordenar: aprovados primeiro
+  lista.sort((a,b) => {
+    const ord = {approved:0, refunded:1, pending:2, abandoned:3};
+    return (ord[a.status]||9) - (ord[b.status]||9);
+  });
+
+  const tbody = document.getElementById('tbody-leads');
+  if (lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">👥</div><h3>Nenhum lead encontrado</h3><p>Importe o CSV da Kiwify para ver seus leads</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(l => {
+    const nome = l.comprador || l.nome || '—';
+    const email = l.email || '—';
+    const celular = l.celular || '—';
+    const produto = l.produto || '—';
+    const dataStr = l.data instanceof Date && !isNaN(l.data) ? l.data.toLocaleDateString('pt-BR') : '—';
+
+    let badgeHtml, rowStyle = '';
+    if (l.status === 'approved') {
+      badgeHtml = `<span class="badge badge-success">✅ Comprou</span>`;
+    } else if (l.status === 'refunded') {
+      badgeHtml = `<span class="badge" style="background:#FFF0F0;color:#8B4343">↩ Reembolso</span>`;
+    } else if (l.status === 'pending') {
+      badgeHtml = `<span class="badge badge-black">⏳ Pendente</span>`;
+    } else {
+      badgeHtml = `<span class="badge badge-brown">🛒 Não comprou</span>`;
+      rowStyle = 'opacity:0.85';
+    }
+
+    const valorStr = l.valor > 0
+      ? `<span style="font-family:'Playfair Display',serif;font-style:italic;font-weight:600;color:var(--brown)">${fmt(l.valor)}</span>`
+      : `<span style="color:var(--gray-light)">—</span>`;
+
+    return `<tr style="${rowStyle}">
+      <td>${badgeHtml}</td>
+      <td><strong>${nome}</strong></td>
+      <td style="color:var(--gray);font-size:0.78rem">${email}</td>
+      <td style="color:var(--gray);font-size:0.78rem">${celular}</td>
+      <td>${produto}</td>
+      <td>${valorStr}</td>
+      <td style="color:var(--gray-light);font-size:0.78rem">${dataStr}</td>
+    </tr>`;
+  }).join('');
 }
 
 function agruparPorProduto(vendas) {
@@ -1447,210 +1659,4 @@ function renderGraficoSemanas(aprovadas) {
 
   const semanas = {};
   aprovadas.forEach(v => {
-    if (!(v.data instanceof Date) || isNaN(v.data)) return;
-    const d = new Date(v.data);
-    d.setDate(d.getDate() - d.getDay());
-    const key = d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
-    if (!semanas[key]) semanas[key] = 0;
-    semanas[key] += v.valor;
-  });
-
-  const labels = Object.keys(semanas).slice(-8);
-  const data = labels.map(l => semanas[l]);
-
-  state.charts['semanas'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{ data, backgroundColor: '#8B6343', borderRadius: 6 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.parsed.y)}` } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9E9890' } },
-        y: { grid: { color: '#EDE8E0' }, ticks: { font: { size: 10 }, color: '#9E9890', callback: v => 'R$' + (v/1000).toFixed(0)+'k' } }
-      }
-    }
-  });
-}
-
-function renderGraficoMeses(aprovadas) {
-  destroyChart('meses');
-  const ctx = document.getElementById('chart-meses').getContext('2d');
-  if (aprovadas.length === 0) return;
-
-  const meses = {};
-  const mesesNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  aprovadas.forEach(v => {
-    if (!(v.data instanceof Date) || isNaN(v.data)) return;
-    const key = `${mesesNomes[v.data.getMonth()]}/${v.data.getFullYear().toString().slice(2)}`;
-    if (!meses[key]) meses[key] = 0;
-    meses[key] += v.valor;
-  });
-
-  const labels = Object.keys(meses);
-  const data = labels.map(l => meses[l]);
-
-  state.charts['meses'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data,
-        backgroundColor: labels.map((_, i) => i === labels.length - 1 ? '#8B6343' : '#C4A882'),
-        borderRadius: 6
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.parsed.y)}` } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9E9890' } },
-        y: { grid: { color: '#EDE8E0' }, ticks: { font: { size: 10 }, color: '#9E9890', callback: v => 'R$' + (v/1000).toFixed(0)+'k' } }
-      }
-    }
-  });
-}
-
-// ══════════════════════════════════════════════════
-// ALERTAS
-// ══════════════════════════════════════════════════
-function renderAlertas(sorted, faturamento, totalAbandonados, aprovadas) {
-  const acoes = document.getElementById('alertas-acoes');
-  const prodStatus = document.getElementById('alertas-produtos');
-  const carrinho = document.getElementById('alertas-carrinho');
-
-  if (sorted.length === 0) {
-    acoes.innerHTML = `<div class="empty-state"><div class="icon">💡</div><h3>Sem alertas ainda</h3><p>Importe seus dados para receber recomendações</p></div>`;
-    prodStatus.innerHTML = `<div class="empty-state"><div class="icon">📊</div><h3>Aguardando dados</h3><p>Os produtos aparecerão após a importação</p></div>`;
-    carrinho.innerHTML = `<div class="empty-state"><div class="icon">🛒</div><h3>Nenhum dado de abandono</h3><p>Importe o relatório de carrinhos da Kiwify</p></div>`;
-    return;
-  }
-
-  // Ações recomendadas
-  let alertasHTML = '';
-  const top = sorted[0];
-  const bottom = sorted[sorted.length - 1];
-  const meta = state.meta;
-  const pct = faturamento / meta;
-
-  if (pct < 0.3) {
-    alertasHTML += alerta('atencao', '⚠️', 'Faturamento abaixo de 30% da meta',
-      `Você está em ${fmt(faturamento)} de ${fmt(meta)}. Considere ativar uma oferta relâmpago ou campanha de reativação esta semana.`);
-  }
-  if (pct >= 0.3 && pct < 0.7) {
-    alertasHTML += alerta('oferta', '🔥', `Empurre ${top[0]} agora`,
-      `Seu produto mais forte está vendendo bem. Crie conteúdo de fundo de funil direcionado para ele essa semana.`);
-  }
-  if (pct >= 0.7) {
-    alertasHTML += alerta('funil', '🎯', 'Você está perto da meta!',
-      `${fmt(meta - faturamento)} para bater. Faça uma ação de urgência real — oferta por tempo limitado ou bônus exclusivo.`);
-  }
-  if (totalAbandonados > 5) {
-    alertasHTML += alerta('atencao', '🛒', `${totalAbandonados} carrinhos abandonados`,
-      `Você tem oportunidade de recuperar receita. Ative uma sequência de follow-up via WhatsApp ou e-mail para esses leads.`);
-  }
-  if (sorted.length > 1) {
-    alertasHTML += alerta('reativar', '💤', `Reativar: ${bottom[0]}`,
-      `Este produto teve o menor faturamento no período (${fmt(bottom[1].total)}). Pode estar precisando de conteúdo de meio de funil ou uma oferta de reativação.`);
-  }
-
-  acoes.innerHTML = alertasHTML || `<div class="alerta funil"><div class="alerta-icon">✅</div><div><div class="alerta-titulo">Tudo nos eixos</div><div class="alerta-desc">Nenhum alerta crítico no momento. Continue monitorando.</div></div></div>`;
-
-  // Status por produto
-  const maxQtd = sorted[0][1].qtd;
-  prodStatus.innerHTML = sorted.map(([nome, d]) => {
-    const pctProd = maxQtd > 0 ? d.qtd / maxQtd : 0;
-    let tipo = 'oferta', icon = '🔥', desc = 'Produto forte — mantenha conteúdo ativo';
-    if (pctProd < 0.3) { tipo = 'reativar'; icon = '💤'; desc = 'Baixo volume — precisa de ativação'; }
-    else if (pctProd < 0.6) { tipo = 'funil'; icon = '📈'; desc = 'Em crescimento — invista em conteúdo'; }
-    return alerta(tipo, icon, `${nome} · ${d.qtd} vendas`, `${fmt(d.total)} faturado. ${desc}`);
-  }).join('');
-
-  // Carrinhos
-  const todosAbandon = [
-    ...state.vendas.filter(v => v.status === 'abandoned'),
-    ...state.carrinhos
-  ];
-  if (todosAbandon.length === 0) {
-    carrinho.innerHTML = `<div class="empty-state"><div class="icon">✅</div><h3>Nenhum abandono registrado</h3></div>`;
-  } else {
-    carrinho.innerHTML = `
-    <p style="font-size:0.82rem;color:var(--gray);margin-bottom:1rem;">${todosAbandon.length} leads não finalizaram a compra. Priorize o follow-up por WhatsApp.</p>
-    <table class="data-table">
-      <thead><tr><th>Produto</th><th>Nome / Email</th><th>Data</th></tr></thead>
-      <tbody>
-        ${todosAbandon.slice(0,10).map(c => `
-          <tr>
-            <td>${c.produto}</td>
-            <td>${c.nome || c.comprador || ''} ${c.email ? `<span style="color:var(--gray-light);font-size:0.72rem">· ${c.email}</span>` : ''}</td>
-            <td>${c.data instanceof Date && !isNaN(c.data) ? c.data.toLocaleDateString('pt-BR') : '—'}</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-    ${todosAbandon.length > 10 ? `<p style="font-size:0.75rem;color:var(--gray-light);margin-top:0.75rem;">+ ${todosAbandon.length - 10} outros registros</p>` : ''}
-    `;
-  }
-}
-
-function alerta(tipo, icon, titulo, desc) {
-  return `<div class="alerta ${tipo}"><div class="alerta-icon">${icon}</div><div><div class="alerta-titulo">${titulo}</div><div class="alerta-desc">${desc}</div></div></div>`;
-}
-
-// ══════════════════════════════════════════════════
-// TABELA DE VENDAS
-// ══════════════════════════════════════════════════
-function renderTabelaVendas(filtro = 'todos') {
-  const tbody = document.getElementById('tbody-vendas');
-  let lista = filtro === 'todos' ? state.vendas : state.vendas.filter(v => v.status === filtro);
-  lista = [...lista].sort((a,b) => (b.data||0) - (a.data||0));
-
-  if (lista.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="icon">🛒</div><h3>Nenhuma venda importada</h3><p>Importe o CSV da Kiwify para ver seu histórico</p></div></td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = lista.map(v => {
-    const statusMap = {
-      approved: ['badge-success','Aprovada'],
-      abandoned: ['badge-brown','Abandonada'],
-      refunded: ['','Reembolso'],
-      pending: ['badge-black','Pendente']
-    };
-    const [cls, label] = statusMap[v.status] || ['','—'];
-    const dataStr = v.data instanceof Date && !isNaN(v.data) ? v.data.toLocaleDateString('pt-BR') : '—';
-    return `<tr>
-      <td>${dataStr}</td>
-      <td>${v.produto}</td>
-      <td>${v.comprador || v.email || '—'}</td>
-      <td style="font-family:'Playfair Display',serif;font-style:italic;font-weight:600;color:var(--brown)">${fmt(v.valor)}</td>
-      <td><span class="badge ${cls}">${label}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-function filtrarVendas() {
-  renderTabelaVendas(document.getElementById('filter-status').value);
-}
-
-// ══════════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════════
-function fmt(v) {
-  return 'R$ ' + (v||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 3000);
-}
-
-// Init
-atualizarDashboard();
-</script>
-</body>
-</html>
+    if (!(v.data instanceof Date) || isNaN(v.da
