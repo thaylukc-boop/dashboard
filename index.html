@@ -4,707 +4,165 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Thayná Ingrid · Dashboard de Vendas</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --cream: #F7F3EE;
-    --cream-dark: #EDE8E0;
-    --brown: #8B6343;
-    --brown-light: #B08B6E;
-    --brown-lighter: #D4B89A;
-    --brown-faint: #F0E8DF;
-    --black: #1A1714;
-    --gray: #6B6560;
-    --gray-light: #9E9890;
-    --border: #DDD5C8;
-    --white: #FFFFFF;
-    --success: #5A7A5A;
-    --warning: #8B6343;
-    --danger: #8B4343;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--cream);
-    color: var(--black);
-    min-height: 100vh;
-  }
-
-  /* ── NAV ── */
-  nav {
-    background: var(--black);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 60px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .nav-brand {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 1.2rem;
-    color: var(--white);
-    letter-spacing: 0.02em;
-  }
-
-  .nav-brand span { color: var(--brown-lighter); }
-
-  .nav-links {
-    display: flex;
-    gap: 0.25rem;
-    list-style: none;
-  }
-
-  .nav-links a {
-    color: var(--gray-light);
-    text-decoration: none;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.5rem 0.9rem;
-    border-radius: 4px;
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-
-  .nav-links a:hover, .nav-links a.active {
-    color: var(--white);
-    background: rgba(255,255,255,0.08);
-  }
-
-  .nav-links a.active {
-    color: var(--brown-lighter);
-  }
-
-  .nav-faturado {
-    font-size: 0.78rem;
-    color: var(--gray-light);
-    font-weight: 400;
-  }
-
-  .nav-faturado strong {
-    color: var(--brown-lighter);
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 0.95rem;
-  }
-
-  /* ── PAGES ── */
-  .page { display: none; padding: 2.5rem 2rem; max-width: 1200px; margin: 0 auto; }
-  .page.active { display: block; }
-
-  /* ── PAGE HEADER ── */
-  .page-header { margin-bottom: 2rem; }
-
-  .page-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--black);
-    line-height: 1.2;
-  }
-
-  .page-header h1 span { color: var(--brown); }
-
-  .page-header p {
-    font-size: 0.85rem;
-    color: var(--gray);
-    margin-top: 0.3rem;
-    font-weight: 400;
-  }
-
-  /* ── CARDS ── */
-  .card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-  }
-
-  .card-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--gray-light);
-    margin-bottom: 0.6rem;
-  }
-
-  .card-value {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--black);
-    line-height: 1;
-  }
-
-  .card-sub {
-    font-size: 0.78rem;
-    color: var(--gray);
-    margin-top: 0.4rem;
-  }
-
-  .card-accent { border-left: 3px solid var(--brown); }
-
-  /* ── GRID ── */
-  .grid-4 {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  /* ── META BANNER ── */
-  .meta-banner {
-    background: var(--black);
-    border-radius: 12px;
-    padding: 1.8rem 2rem;
-    margin-bottom: 1.5rem;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 2rem;
-    align-items: center;
-  }
-
-  .meta-faturado .label {
-    font-size: 0.68rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--gray-light);
-    margin-bottom: 0.4rem;
-  }
-
-  .meta-faturado .valor {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 2.4rem;
-    font-weight: 700;
-    color: var(--white);
-  }
-
-  .meta-faturado .sub {
-    font-size: 0.75rem;
-    color: var(--gray-light);
-    margin-top: 0.2rem;
-  }
-
-  .meta-progress-area .meta-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-    color: var(--gray-light);
-    margin-bottom: 0.5rem;
-  }
-
-  .meta-progress-area .meta-label span:last-child {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    color: var(--brown-lighter);
-    font-size: 0.9rem;
-  }
-
-  .progress-bar {
-    background: rgba(255,255,255,0.1);
-    border-radius: 99px;
-    height: 8px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--brown), var(--brown-lighter));
-    border-radius: 99px;
-    transition: width 0.8s ease;
-  }
-
-  .meta-falta {
-    font-size: 0.72rem;
-    color: var(--gray-light);
-    margin-top: 0.5rem;
-  }
-
-  .meta-pct {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--brown-lighter);
-    text-align: right;
-  }
-
-  /* ── PRODUTO ROW ── */
-  .produto-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--cream-dark);
-  }
-
-  .produto-row:last-child { border-bottom: none; }
-
-  .produto-row .nome {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--black);
-    flex: 1;
-  }
-
-  .produto-row .qtd {
-    font-size: 0.78rem;
-    color: var(--gray);
-    margin-right: 1.5rem;
-  }
-
-  .produto-row .valor {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--brown);
-    min-width: 90px;
-    text-align: right;
-  }
-
-  .produto-bar-wrap {
-    width: 100px;
-    background: var(--cream-dark);
-    border-radius: 99px;
-    height: 5px;
-    margin: 0 1rem;
-  }
-
-  .produto-bar {
-    height: 100%;
-    background: var(--brown);
-    border-radius: 99px;
-  }
-
-  /* ── PIPELINE CARDS ── */
-  .pipeline {
-    display: flex;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .pipeline-card {
-    flex: 1;
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.2rem 1rem;
-    text-align: center;
-    position: relative;
-  }
-
-  .pipeline-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin: 0 auto 0.6rem;
-  }
-
-  .pipeline-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--gray-light);
-    margin-bottom: 0.5rem;
-  }
-
-  .pipeline-num {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--black);
-  }
-
-  .pipeline-valor {
-    font-size: 0.72rem;
-    color: var(--brown);
-    margin-top: 0.2rem;
-  }
-
-  /* ── ALERTA ── */
-  .alerta {
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.75rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    border: 1px solid;
-  }
-
-  .alerta-icon {
-    font-size: 1.1rem;
-    margin-top: 0.05rem;
-    flex-shrink: 0;
-  }
-
-  .alerta-titulo {
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-bottom: 0.2rem;
-    letter-spacing: 0.02em;
-  }
-
-  .alerta-desc {
-    font-size: 0.78rem;
-    line-height: 1.5;
-    color: var(--gray);
-  }
-
-  .alerta.oferta {
-    background: #FFF8F3;
-    border-color: var(--brown-lighter);
-  }
-
-  .alerta.oferta .alerta-titulo { color: var(--brown); }
-
-  .alerta.reativar {
-    background: #F3F8FF;
-    border-color: #A0B8D8;
-  }
-
-  .alerta.reativar .alerta-titulo { color: #3A6090; }
-
-  .alerta.funil {
-    background: #F3FFF5;
-    border-color: #90C8A0;
-  }
-
-  .alerta.funil .alerta-titulo { color: var(--success); }
-
-  .alerta.atencao {
-    background: #FFF3F3;
-    border-color: #D8A0A0;
-  }
-
-  .alerta.atencao .alerta-titulo { color: var(--danger); }
-
-  /* ── SEÇÃO TITLE ── */
-  .section-title {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--black);
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  /* ── COMPARATIVO TABS ── */
-  .comp-tabs {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1.2rem;
-  }
-
-  .comp-tab {
-    padding: 0.4rem 1rem;
-    border-radius: 99px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    background: var(--white);
-    color: var(--gray);
-    transition: all 0.2s;
-  }
-
-  .comp-tab.active {
-    background: var(--brown);
-    color: var(--white);
-    border-color: var(--brown);
-  }
-
-  /* ── CHART CONTAINER ── */
-  .chart-wrap {
-    position: relative;
-    height: 220px;
-  }
-
-  /* ── IMPORT ── */
-  .drop-zone {
-    border: 2px dashed var(--brown-lighter);
-    border-radius: 12px;
-    padding: 3rem 2rem;
-    text-align: center;
-    background: var(--brown-faint);
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 1.5rem;
-  }
-
-  .drop-zone:hover, .drop-zone.drag-over {
-    background: #EAD9C8;
-    border-color: var(--brown);
-  }
-
-  .drop-zone-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-
-  .drop-zone h3 {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 1.1rem;
-    color: var(--brown);
-    margin-bottom: 0.4rem;
-  }
-
-  .drop-zone p { font-size: 0.8rem; color: var(--gray); }
-
-  #csv-input { display: none; }
-
-  .btn {
-    display: inline-block;
-    padding: 0.6rem 1.4rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-  }
-
-  .btn-primary {
-    background: var(--brown);
-    color: var(--white);
-  }
-
-  .btn-primary:hover { background: #7A5535; }
-
-  .btn-outline {
-    background: transparent;
-    color: var(--brown);
-    border: 1px solid var(--brown);
-  }
-
-  .btn-outline:hover { background: var(--brown-faint); }
-
-  /* ── CONFIG ── */
-  .config-card {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .config-card h3 {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 1rem;
-    color: var(--black);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .config-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .config-row label {
-    font-size: 0.78rem;
-    color: var(--gray);
-    min-width: 140px;
-  }
-
-  .config-row input {
-    flex: 1;
-    padding: 0.5rem 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-family: 'Inter', sans-serif;
-    color: var(--black);
-    background: var(--cream);
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .config-row input:focus { border-color: var(--brown); }
-
-  /* ── BADGE ── */
-  .badge {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 99px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .badge-brown { background: var(--brown-faint); color: var(--brown); }
-  .badge-black { background: var(--black); color: var(--white); }
-  .badge-success { background: #E8F5E8; color: var(--success); }
-
-  /* ── EMPTY STATE ── */
-  .empty-state {
-    text-align: center;
-    padding: 3rem 2rem;
-    color: var(--gray-light);
-  }
-
-  .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-
-  .empty-state h3 {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 1.1rem;
-    color: var(--gray);
-    margin-bottom: 0.4rem;
-  }
-
-  .empty-state p { font-size: 0.8rem; }
-
-  /* ── TOAST ── */
-  #toast {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    background: var(--black);
-    color: var(--white);
-    padding: 0.8rem 1.4rem;
-    border-radius: 10px;
-    font-size: 0.82rem;
-    z-index: 999;
-    display: none;
-    animation: slideIn 0.3s ease;
-    border-left: 3px solid var(--brown-lighter);
-  }
-
-  @keyframes slideIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-
-  /* ── TABELA ── */
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-  }
-
-  .data-table th {
-    text-align: left;
-    padding: 0.6rem 0.8rem;
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--gray-light);
-    border-bottom: 1px solid var(--border);
-    font-weight: 600;
-  }
-
-  .data-table td {
-    padding: 0.7rem 0.8rem;
-    border-bottom: 1px solid var(--cream-dark);
-    color: var(--black);
-    vertical-align: middle;
-  }
-
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: var(--cream); }
-
-  /* ── VARIAÇÃO ── */
-  .variacao {
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-  }
-
-  .variacao.up { color: var(--success); background: #E8F5E8; }
-  .variacao.down { color: var(--danger); background: #FFF0F0; }
-  .variacao.neutral { color: var(--gray); background: var(--cream-dark); }
-
-  /* ── PERIODO SELECT ── */
-  .periodo-select {
-    padding: 0.4rem 0.8rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 0.78rem;
-    font-family: 'Inter', sans-serif;
-    color: var(--gray);
-    background: var(--white);
-    cursor: pointer;
-    outline: none;
-  }
-
-  .periodo-select:focus { border-color: var(--brown); }
-
-  /* ── HEADER ROW ── */
-  .header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-  }
+:root {
+  --cream:#F7F3EE; --cream-dark:#EDE8E0; --brown:#8B6343; --brown-light:#B08B6E;
+  --brown-lighter:#D4B89A; --brown-faint:#F0E8DF; --black:#1A1714; --gray:#6B6560;
+  --gray-light:#9E9890; --border:#DDD5C8; --white:#FFFFFF; --success:#5A7A5A;
+  --danger:#8B4343;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--cream);color:var(--black);min-height:100vh;}
+
+nav{background:var(--black);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;}
+.nav-brand{font-family:'Playfair Display',serif;font-style:italic;font-size:1.2rem;color:var(--white);letter-spacing:.02em;}
+.nav-brand span{color:var(--brown-lighter);}
+.nav-links{display:flex;gap:.25rem;list-style:none;}
+.nav-btn{background:none;border:none;color:var(--gray-light);font-family:'Inter',sans-serif;font-size:.8rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:.5rem .9rem;border-radius:4px;transition:all .2s;cursor:pointer;}
+.nav-btn:hover{color:var(--white);background:rgba(255,255,255,.08);}
+.nav-btn.active{color:var(--brown-lighter);background:rgba(255,255,255,.08);}
+.nav-faturado{font-size:.78rem;color:var(--gray-light);}
+.nav-faturado strong{color:var(--brown-lighter);font-family:'Playfair Display',serif;font-style:italic;font-size:.95rem;}
+
+.page{display:none;padding:2.5rem 2rem;max-width:1200px;margin:0 auto;}
+
+.page-header{margin-bottom:2rem;}
+.page-header h1{font-family:'Playfair Display',serif;font-style:italic;font-size:2rem;font-weight:600;line-height:1.2;}
+.page-header h1 span{color:var(--brown);}
+.page-header p{font-size:.85rem;color:var(--gray);margin-top:.3rem;}
+
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;}
+.card-label{font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-light);margin-bottom:.6rem;}
+.card-value{font-family:'Playfair Display',serif;font-style:italic;font-size:2rem;font-weight:700;line-height:1;}
+.card-sub{font-size:.78rem;color:var(--gray);margin-top:.4rem;}
+.card-accent{border-left:3px solid var(--brown);}
+
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;}
+
+.meta-banner{background:var(--black);border-radius:12px;padding:1.8rem 2rem;margin-bottom:1.5rem;display:grid;grid-template-columns:auto 1fr auto;gap:2rem;align-items:center;}
+.meta-faturado .label{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gray-light);margin-bottom:.4rem;}
+.meta-faturado .valor{font-family:'Playfair Display',serif;font-style:italic;font-size:2.4rem;font-weight:700;color:var(--white);}
+.meta-faturado .sub{font-size:.75rem;color:var(--gray-light);margin-top:.2rem;}
+.meta-progress-area .meta-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--gray-light);margin-bottom:.5rem;}
+.meta-progress-area .meta-label span:last-child{font-family:'Playfair Display',serif;font-style:italic;color:var(--brown-lighter);font-size:.9rem;}
+.progress-bar{background:rgba(255,255,255,.1);border-radius:99px;height:8px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--brown),var(--brown-lighter));border-radius:99px;transition:width .8s ease;}
+.meta-falta{font-size:.72rem;color:var(--gray-light);margin-top:.5rem;}
+.meta-pct{font-family:'Playfair Display',serif;font-style:italic;font-size:2rem;font-weight:700;color:var(--brown-lighter);text-align:right;}
+
+.produto-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--cream-dark);}
+.produto-row:last-child{border-bottom:none;}
+.produto-row .nome{font-size:.85rem;font-weight:500;flex:1;}
+.produto-row .qtd{font-size:.78rem;color:var(--gray);margin-right:1.5rem;}
+.produto-row .valor{font-family:'Playfair Display',serif;font-style:italic;font-size:.95rem;font-weight:600;color:var(--brown);min-width:90px;text-align:right;}
+.produto-bar-wrap{width:100px;background:var(--cream-dark);border-radius:99px;height:5px;margin:0 1rem;}
+.produto-bar{height:100%;background:var(--brown);border-radius:99px;}
+
+.pipeline{display:flex;gap:.75rem;margin-bottom:1.5rem;}
+.pipeline-card{flex:1;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1.2rem 1rem;text-align:center;}
+.pipeline-dot{width:8px;height:8px;border-radius:50%;margin:0 auto .6rem;}
+.pipeline-label{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-light);margin-bottom:.5rem;}
+.pipeline-num{font-family:'Playfair Display',serif;font-style:italic;font-size:1.8rem;font-weight:700;}
+.pipeline-valor{font-size:.72rem;color:var(--brown);margin-top:.2rem;}
+
+.alerta{border-radius:10px;padding:1rem 1.2rem;margin-bottom:.75rem;display:flex;align-items:flex-start;gap:.75rem;border:1px solid;}
+.alerta-icon{font-size:1.1rem;margin-top:.05rem;flex-shrink:0;}
+.alerta-titulo{font-size:.8rem;font-weight:600;margin-bottom:.2rem;}
+.alerta-desc{font-size:.78rem;line-height:1.5;color:var(--gray);}
+.alerta.oferta{background:#FFF8F3;border-color:var(--brown-lighter);}
+.alerta.oferta .alerta-titulo{color:var(--brown);}
+.alerta.reativar{background:#F3F8FF;border-color:#A0B8D8;}
+.alerta.reativar .alerta-titulo{color:#3A6090;}
+.alerta.funil{background:#F3FFF5;border-color:#90C8A0;}
+.alerta.funil .alerta-titulo{color:var(--success);}
+.alerta.atencao{background:#FFF3F3;border-color:#D8A0A0;}
+.alerta.atencao .alerta-titulo{color:var(--danger);}
+
+.section-title{font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;font-weight:600;color:var(--black);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+
+.comp-tabs{display:flex;gap:.5rem;margin-bottom:1.2rem;}
+.comp-tab{padding:.4rem 1rem;border-radius:99px;font-size:.75rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--gray);transition:all .2s;}
+.comp-tab.active{background:var(--brown);color:var(--white);border-color:var(--brown);}
+
+.drop-zone{border:2px dashed var(--brown-lighter);border-radius:12px;padding:3rem 2rem;text-align:center;background:var(--brown-faint);cursor:pointer;transition:all .2s;margin-bottom:1.5rem;}
+.drop-zone:hover,.drop-zone.drag-over{background:#EAD9C8;border-color:var(--brown);}
+.drop-zone-icon{font-size:2.5rem;margin-bottom:.75rem;}
+.drop-zone h3{font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;color:var(--brown);margin-bottom:.4rem;}
+.drop-zone p{font-size:.8rem;color:var(--gray);}
+input[type=file]{display:none;}
+
+.btn{display:inline-block;padding:.6rem 1.4rem;border-radius:8px;font-size:.8rem;font-weight:600;letter-spacing:.05em;cursor:pointer;border:none;transition:all .2s;}
+.btn-primary{background:var(--brown);color:var(--white);}
+.btn-primary:hover{background:#7A5535;}
+.btn-outline{background:transparent;color:var(--brown);border:1px solid var(--brown);}
+.btn-outline:hover{background:var(--brown-faint);}
+
+.config-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;}
+.config-card h3{font-family:'Playfair Display',serif;font-style:italic;font-size:1rem;color:var(--black);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;}
+.config-row{display:flex;align-items:center;gap:1rem;margin-bottom:.75rem;}
+.config-row label{font-size:.78rem;color:var(--gray);min-width:140px;}
+.config-row input{flex:1;padding:.5rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-family:'Inter',sans-serif;color:var(--black);background:var(--cream);outline:none;}
+.config-row input:focus{border-color:var(--brown);}
+
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:99px;font-size:.65rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;}
+.badge-brown{background:var(--brown-faint);color:var(--brown);}
+.badge-black{background:var(--black);color:var(--white);}
+.badge-success{background:#E8F5E8;color:var(--success);}
+.badge-ok{background:#E8F5E8;color:#3D6B3D;}
+.badge-no{background:var(--brown-faint);color:var(--brown);}
+.badge-ref{background:#FFE8E8;color:var(--danger);}
+.badge-pen{background:#E8E8E8;color:#555;}
+
+.empty-state{text-align:center;padding:3rem 2rem;color:var(--gray-light);}
+.empty-state .icon{font-size:2.5rem;margin-bottom:.75rem;}
+.empty-state h3{font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;color:var(--gray);margin-bottom:.4rem;}
+.empty-state p{font-size:.8rem;}
+
+#toast{position:fixed;bottom:2rem;right:2rem;background:var(--black);color:var(--white);padding:.8rem 1.4rem;border-radius:10px;font-size:.82rem;z-index:999;display:none;border-left:3px solid var(--brown-lighter);}
+
+.data-table{width:100%;border-collapse:collapse;font-size:.82rem;}
+.data-table th{text-align:left;padding:.6rem .8rem;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-light);border-bottom:1px solid var(--border);font-weight:600;}
+.data-table td{padding:.7rem .8rem;border-bottom:1px solid var(--cream-dark);vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:var(--cream);}
+
+.periodo-select{padding:.4rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.78rem;font-family:'Inter',sans-serif;color:var(--gray);background:var(--white);cursor:pointer;outline:none;}
+.header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+.search-input{padding:.4rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.78rem;font-family:'Inter',sans-serif;color:var(--black);background:var(--white);outline:none;width:200px;}
+.search-input:focus{border-color:var(--brown);}
+
+.whats-btn{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .6rem;background:#25D366;color:#fff;border-radius:6px;font-size:.7rem;font-weight:600;text-decoration:none;}
+.whats-btn:hover{background:#1DB954;}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-brand">Thayná <span>Ingrid</span></div>
-  <ul class="nav-links" id="nav-links">
-    <li><a data-page="visao-geral" class="active">Visão Geral</a></li>
-    <li><a data-page="vendas">Vendas</a></li>
-    <li><a data-page="leads">Leads</a></li>
-    <li><a data-page="comparativos">Comparativos</a></li>
-    <li><a data-page="alertas">Alertas</a></li>
-    <li><a data-page="importar">Importar CSV</a></li>
-    <li><a data-page="config">Config</a></li>
+  <ul class="nav-links">
+    <li><button class="nav-btn active" onclick="nav('visao-geral',this)">Visão Geral</button></li>
+    <li><button class="nav-btn" onclick="nav('vendas',this)">Vendas</button></li>
+    <li><button class="nav-btn" onclick="nav('leads',this)">Leads</button></li>
+    <li><button class="nav-btn" onclick="nav('comparativos',this)">Comparativos</button></li>
+    <li><button class="nav-btn" onclick="nav('alertas',this)">Alertas</button></li>
+    <li><button class="nav-btn" onclick="nav('importar',this)">Importar CSV</button></li>
+    <li><button class="nav-btn" onclick="nav('config',this)">Config</button></li>
   </ul>
   <div class="nav-faturado">Faturado no mês <strong id="nav-faturado">R$ 0,00</strong></div>
 </nav>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- ======================== VISÃO GERAL ======================== -->
-<div class="page active" id="page-visao-geral">
+<!-- VISÃO GERAL -->
+<div class="page" id="page-visao-geral" style="display:block">
   <div class="page-header">
     <h1>Visão <span>Geral</span></h1>
     <p id="vg-subtitle">Importe um CSV da Kiwify para visualizar seus dados</p>
   </div>
 
-  <!-- META BANNER -->
   <div class="meta-banner">
     <div class="meta-faturado">
       <div class="label">Faturado no mês</div>
@@ -716,947 +174,564 @@
         <span id="vg-meta-label">Meta mensal</span>
         <span id="vg-meta-pct-label">0%</span>
       </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="vg-progress" style="width: 0%"></div>
-      </div>
+      <div class="progress-bar"><div class="progress-fill" id="vg-progress" style="width:0%"></div></div>
       <div class="meta-falta" id="vg-meta-falta">Configure sua meta em Config</div>
     </div>
     <div class="meta-pct" id="vg-pct">0%</div>
   </div>
 
-  <!-- KPIs -->
   <div class="grid-4">
-    <div class="card card-accent">
-      <div class="card-label">Ticket Médio</div>
-      <div class="card-value" id="vg-ticket">R$ 0</div>
-      <div class="card-sub">por venda</div>
-    </div>
-    <div class="card card-accent">
-      <div class="card-label">Total de Leads</div>
-      <div class="card-value" id="vg-leads">0</div>
-      <div class="card-sub">carrinhos iniciados</div>
-    </div>
-    <div class="card card-accent">
-      <div class="card-label">Carrinhos Abandonados</div>
-      <div class="card-value" id="vg-abandonados">0</div>
-      <div class="card-sub" id="vg-tx-abandono">taxa: 0%</div>
-    </div>
-    <div class="card card-accent">
-      <div class="card-label">Produto Top</div>
-      <div class="card-value" style="font-size:1.1rem; font-style:italic;" id="vg-top-produto">—</div>
-      <div class="card-sub" id="vg-top-produto-val">em faturamento</div>
-    </div>
+    <div class="card card-accent"><div class="card-label">Ticket Médio</div><div class="card-value" id="vg-ticket">R$ 0</div><div class="card-sub">por venda</div></div>
+    <div class="card card-accent"><div class="card-label">Total de Leads</div><div class="card-value" id="vg-leads">0</div><div class="card-sub">carrinhos iniciados</div></div>
+    <div class="card card-accent"><div class="card-label">Carrinhos Abandonados</div><div class="card-value" id="vg-abandonados">0</div><div class="card-sub" id="vg-tx-abandono">taxa: 0%</div></div>
+    <div class="card card-accent"><div class="card-label">Produto Top</div><div class="card-value" style="font-size:1.1rem;font-style:italic" id="vg-top-produto">—</div><div class="card-sub" id="vg-top-produto-val">em faturamento</div></div>
   </div>
 
-  <!-- GRÁFICOS -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="section-title">Faturamento por Produto</div>
-      <div class="chart-wrap">
-        <canvas id="chart-produtos"></canvas>
-      </div>
-    </div>
-    <div class="card">
-      <div class="section-title">Vendas ao longo do mês</div>
-      <div class="chart-wrap">
-        <canvas id="chart-timeline"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- PIPELINE -->
   <div class="section-title">Pipeline de Vendas</div>
   <div class="pipeline">
-    <div class="pipeline-card">
-      <div class="pipeline-dot" style="background:#C8B8A8"></div>
-      <div class="pipeline-label">Leads</div>
-      <div class="pipeline-num" id="pip-leads">0</div>
-      <div class="pipeline-valor">iniciaram</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="pipeline-dot" style="background:#B08B6E"></div>
-      <div class="pipeline-label">Aprovados</div>
-      <div class="pipeline-num" id="pip-aprovados">0</div>
-      <div class="pipeline-valor" id="pip-aprovados-val">R$ 0</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="pipeline-dot" style="background:#8B6343"></div>
-      <div class="pipeline-label">Fechados</div>
-      <div class="pipeline-num" id="pip-fechados">0</div>
-      <div class="pipeline-valor" id="pip-fechados-val">R$ 0</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="pipeline-dot" style="background:#8B4343"></div>
-      <div class="pipeline-label">Abandonados</div>
-      <div class="pipeline-num" id="pip-abandonados">0</div>
-      <div class="pipeline-valor" id="pip-tx-conv">tx: 0%</div>
-    </div>
-    <div class="pipeline-card">
-      <div class="pipeline-dot" style="background:#5A7A5A"></div>
-      <div class="pipeline-label">Reembolsos</div>
-      <div class="pipeline-num" id="pip-reembolsos">0</div>
-      <div class="pipeline-valor" id="pip-reembolsos-val">R$ 0</div>
-    </div>
+    <div class="pipeline-card"><div class="pipeline-dot" style="background:#C8B8A8"></div><div class="pipeline-label">Leads</div><div class="pipeline-num" id="pip-leads">0</div><div class="pipeline-valor">iniciaram</div></div>
+    <div class="pipeline-card"><div class="pipeline-dot" style="background:#B08B6E"></div><div class="pipeline-label">Aprovados</div><div class="pipeline-num" id="pip-aprovados">0</div><div class="pipeline-valor" id="pip-aprovados-val">R$ 0</div></div>
+    <div class="pipeline-card"><div class="pipeline-dot" style="background:#8B6343"></div><div class="pipeline-label">Fechados</div><div class="pipeline-num" id="pip-fechados">0</div><div class="pipeline-valor" id="pip-fechados-val">R$ 0</div></div>
+    <div class="pipeline-card"><div class="pipeline-dot" style="background:#8B4343"></div><div class="pipeline-label">Abandonados</div><div class="pipeline-num" id="pip-abandonados">0</div><div class="pipeline-valor" id="pip-tx-conv">tx: 0%</div></div>
+    <div class="pipeline-card"><div class="pipeline-dot" style="background:#5A7A5A"></div><div class="pipeline-label">Reembolsos</div><div class="pipeline-num" id="pip-reembolsos">0</div><div class="pipeline-valor" id="pip-reembolsos-val">R$ 0</div></div>
   </div>
 
-  <!-- POR PRODUTO TABLE -->
-  <div class="card" style="margin-top:0.5rem">
-    <div class="section-title">Detalhamento por Produto</div>
-    <div id="produto-list">
-      <div class="empty-state">
-        <div class="icon">📦</div>
-        <h3>Nenhum dado ainda</h3>
-        <p>Importe o CSV da Kiwify para visualizar</p>
-      </div>
-    </div>
+  <div class="card">
+    <div class="section-title">Faturamento por Produto</div>
+    <div id="produto-list"><div class="empty-state"><div class="icon">📦</div><h3>Nenhum dado ainda</h3><p>Importe o CSV da Kiwify para visualizar</p></div></div>
   </div>
 </div>
 
-<!-- ======================== VENDAS ======================== -->
+<!-- VENDAS -->
 <div class="page" id="page-vendas">
-  <div class="page-header">
-    <h1>Suas <span>Vendas</span></h1>
-    <p>Histórico completo de transações</p>
-  </div>
+  <div class="page-header"><h1>Suas <span>Vendas</span></h1><p>Histórico completo de transações</p></div>
   <div class="card">
     <div class="header-row">
       <div class="section-title" style="margin-bottom:0;border:none;">Todas as transações</div>
       <select class="periodo-select" id="filter-status" onchange="filtrarVendas()">
         <option value="todos">Todos os status</option>
-        <option value="approved">Aprovadas</option>
-        <option value="abandoned">Abandonadas</option>
-        <option value="refunded">Reembolsadas</option>
+        <option value="ok">Aprovadas</option>
+        <option value="no">Recusadas/Abandonadas</option>
+        <option value="ref">Reembolsadas</option>
+        <option value="pen">Pendentes</option>
       </select>
     </div>
-    <div style="overflow-x:auto;">
-      <table class="data-table" id="tabela-vendas">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Produto</th>
-            <th>Comprador</th>
-            <th>Valor</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="tbody-vendas">
-          <tr>
-            <td colspan="5">
-              <div class="empty-state">
-                <div class="icon">🛒</div>
-                <h3>Nenhuma venda importada</h3>
-                <p>Importe o CSV da Kiwify para ver seu histórico</p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr><th>Data</th><th>Produto</th><th>Comprador</th><th>Valor</th><th>Status</th></tr></thead>
+        <tbody id="tbody-vendas"><tr><td colspan="5"><div class="empty-state"><div class="icon">🛒</div><h3>Nenhuma venda importada</h3><p>Importe o CSV da Kiwify</p></div></td></tr></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ======================== COMPARATIVOS ======================== -->
-<div class="page" id="page-comparativos">
-  <div class="page-header">
-    <h1><span>Comparativos</span> de Período</h1>
-    <p>Semana vs semana · Mês vs mês · Entrada vs Premium</p>
-  </div>
-
-  <div class="comp-tabs">
-    <div class="comp-tab active" onclick="setCompTab('semana', this)">Semana vs Semana</div>
-    <div class="comp-tab" onclick="setCompTab('mes', this)">Mês vs Mês</div>
-    <div class="comp-tab" onclick="setCompTab('nivel', this)">Entrada vs Premium</div>
-  </div>
-
-  <div id="comp-semana">
-    <div class="grid-2">
-      <div class="card">
-        <div class="section-title">Semana Atual</div>
-        <div class="card-label">Faturamento</div>
-        <div class="card-value" id="comp-semana-atual">R$ 0</div>
-        <div class="card-sub" id="comp-semana-atual-qtd">0 vendas</div>
-      </div>
-      <div class="card">
-        <div class="section-title">Semana Anterior</div>
-        <div class="card-label">Faturamento</div>
-        <div class="card-value" id="comp-semana-ant">R$ 0</div>
-        <div class="card-sub" id="comp-semana-ant-qtd">0 vendas</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="section-title">Evolução Semanal</div>
-      <div class="chart-wrap">
-        <canvas id="chart-semanas"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <div id="comp-mes" style="display:none">
-    <div class="card">
-      <div class="section-title">Faturamento Mensal</div>
-      <div class="chart-wrap">
-        <canvas id="chart-meses"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <div id="comp-nivel" style="display:none">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-label">🌱 Produtos de Entrada</div>
-        <div class="card-value" id="comp-entrada-val">R$ 0</div>
-        <div class="card-sub" id="comp-entrada-qtd">0 vendas · até R$ 97</div>
-        <div style="margin-top:1rem" id="comp-entrada-lista"></div>
-      </div>
-      <div class="card">
-        <div class="card-label">💎 Produtos Premium</div>
-        <div class="card-value" id="comp-premium-val">R$ 0</div>
-        <div class="card-sub" id="comp-premium-qtd">0 vendas · acima de R$ 97</div>
-        <div style="margin-top:1rem" id="comp-premium-lista"></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="section-title">Distribuição Entrada vs Premium</div>
-      <div class="chart-wrap" style="height:180px">
-        <canvas id="chart-nivel"></canvas>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ======================== ALERTAS ======================== -->
-<div class="page" id="page-alertas">
-  <div class="page-header">
-    <h1>Alertas <span>Estratégicos</span></h1>
-    <p>O que fazer agora com base nos seus dados</p>
-  </div>
-
-  <div class="grid-2">
-    <div>
-      <div class="section-title">Ações Recomendadas</div>
-      <div id="alertas-acoes">
-        <div class="empty-state">
-          <div class="icon">💡</div>
-          <h3>Sem alertas ainda</h3>
-          <p>Importe seus dados para receber recomendações</p>
-        </div>
-      </div>
-    </div>
-    <div>
-      <div class="section-title">Status dos Produtos</div>
-      <div id="alertas-produtos">
-        <div class="empty-state">
-          <div class="icon">📊</div>
-          <h3>Aguardando dados</h3>
-          <p>Os produtos aparecerão após a importação</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-top:1rem">
-    <div class="section-title">Carrinho Abandonado — Oportunidades</div>
-    <div id="alertas-carrinho">
-      <div class="empty-state">
-        <div class="icon">🛒</div>
-        <h3>Nenhum dado de abandono</h3>
-        <p>Importe o relatório de carrinhos da Kiwify</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ======================== LEADS ======================== -->
+<!-- LEADS -->
 <div class="page" id="page-leads">
-  <div class="page-header">
-    <h1>Seus <span>Leads</span></h1>
-    <p>Quem comprou e quem ainda não comprou</p>
+  <div class="page-header"><h1>Seus <span>Leads</span></h1><p>Quem comprou e quem ainda não comprou — com dados de contato</p></div>
+  <div class="grid-4">
+    <div class="card card-accent"><div class="card-label">✅ Compraram</div><div class="card-value" id="l-comp">0</div><div class="card-sub">clientes ativos</div></div>
+    <div class="card card-accent"><div class="card-label">🛒 Não compraram</div><div class="card-value" id="l-nao">0</div><div class="card-sub">para recuperar</div></div>
+    <div class="card card-accent"><div class="card-label">↩ Reembolsos</div><div class="card-value" id="l-ref">0</div><div class="card-sub">estornos</div></div>
+    <div class="card card-accent"><div class="card-label">📊 Conversão</div><div class="card-value" id="l-conv">0%</div><div class="card-sub">leads que compraram</div></div>
   </div>
-
-  <!-- KPIs Leads -->
-  <div class="grid-3" style="margin-bottom:1.5rem">
-    <div class="card card-accent">
-      <div class="card-label">✅ Compraram</div>
-      <div class="card-value" id="leads-compraram">0</div>
-      <div class="card-sub">clientes ativos</div>
-    </div>
-    <div class="card card-accent">
-      <div class="card-label">🛒 Não Compraram</div>
-      <div class="card-value" id="leads-nao-compraram">0</div>
-      <div class="card-sub">oportunidade de recuperação</div>
-    </div>
-    <div class="card card-accent">
-      <div class="card-label">📊 Taxa de Conversão</div>
-      <div class="card-value" id="leads-tx-conv">0%</div>
-      <div class="card-sub">leads que viraram clientes</div>
-    </div>
-  </div>
-
-  <!-- Filtros -->
   <div class="card">
-    <div class="header-row" style="margin-bottom:1rem">
+    <div class="header-row">
       <div class="section-title" style="margin-bottom:0;border:none;">Todos os contatos</div>
-      <div style="display:flex;gap:0.5rem;align-items:center">
-        <input type="text" id="leads-search" placeholder="Buscar nome ou email…" oninput="renderLeads()"
-          style="padding:0.4rem 0.8rem;border:1px solid var(--border);border-radius:8px;font-size:0.8rem;font-family:'Inter',sans-serif;outline:none;background:var(--cream);color:var(--black);width:200px">
-        <select class="periodo-select" id="leads-filter" onchange="renderLeads()">
-          <option value="todos">Todos</option>
-          <option value="comprou">Compraram</option>
-          <option value="nao-comprou">Não compraram</option>
-          <option value="reembolso">Reembolso</option>
+      <div style="display:flex;gap:.5rem">
+        <input class="search-input" id="l-busca" placeholder="Buscar nome ou email…" oninput="renderLeads()">
+        <select class="periodo-select" id="l-fil" onchange="renderLeads()">
+          <option value="">Todos</option>
+          <option value="ok">Compraram</option>
+          <option value="no">Não compraram</option>
+          <option value="ref">Reembolso</option>
+          <option value="pen">Pendente</option>
         </select>
       </div>
     </div>
-    <div style="overflow-x:auto">
-      <table class="data-table" id="tabela-leads">
-        <thead>
-          <tr>
-            <th>Status</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Celular</th>
-            <th>Produto</th>
-            <th>Valor</th>
-            <th>Data</th>
-          </tr>
-        </thead>
-        <tbody id="tbody-leads">
-          <tr>
-            <td colspan="6">
-              <div class="empty-state">
-                <div class="icon">👥</div>
-                <h3>Nenhum lead ainda</h3>
-                <p>Importe o CSV da Kiwify para ver seus leads</p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
+    <div style="overflow-x:auto;margin-top:1rem">
+      <table class="data-table">
+        <thead><tr><th>Status</th><th>Nome</th><th>Email</th><th>Celular</th><th>Produto</th><th>Valor</th><th>Data</th><th>WhatsApp</th></tr></thead>
+        <tbody id="tbody-leads"><tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div><h3>Nenhum lead ainda</h3><p>Importe os CSVs da Kiwify</p></div></td></tr></tbody>
       </table>
     </div>
   </div>
 </div>
 
-<!-- ======================== IMPORTAR ======================== -->
-<div class="page" id="page-importar">
-  <div class="page-header">
-    <h1>Importar <span>CSV</span></h1>
-    <p>Relatórios exportados da Kiwify</p>
+<!-- COMPARATIVOS -->
+<div class="page" id="page-comparativos">
+  <div class="page-header"><h1><span>Comparativos</span> de Período</h1><p>Semana vs semana · Mês vs mês · Entrada vs Premium</p></div>
+  <div class="comp-tabs">
+    <div class="comp-tab active" onclick="setCompTab('semana',this)">Semana vs Semana</div>
+    <div class="comp-tab" onclick="setCompTab('mes',this)">Mês vs Mês</div>
+    <div class="comp-tab" onclick="setCompTab('nivel',this)">Entrada vs Premium</div>
   </div>
+  <div id="comp-semana">
+    <div class="grid-2">
+      <div class="card"><div class="section-title">Semana Atual</div><div class="card-label">Faturamento</div><div class="card-value" id="comp-semana-atual">R$ 0</div><div class="card-sub" id="comp-semana-atual-qtd">0 vendas</div></div>
+      <div class="card"><div class="section-title">Semana Anterior</div><div class="card-label">Faturamento</div><div class="card-value" id="comp-semana-ant">R$ 0</div><div class="card-sub" id="comp-semana-ant-qtd">0 vendas</div></div>
+    </div>
+  </div>
+  <div id="comp-mes" style="display:none">
+    <div class="card"><div class="section-title">Faturamento Mensal</div><div id="comp-mes-lista"><div class="empty-state"><div class="icon">📅</div><h3>Sem dados</h3><p>Importe seus CSVs</p></div></div></div>
+  </div>
+  <div id="comp-nivel" style="display:none">
+    <div class="grid-2">
+      <div class="card"><div class="card-label">🌱 Produtos de Entrada (até R$200)</div><div class="card-value" id="comp-entrada-val">R$ 0</div><div class="card-sub" id="comp-entrada-qtd">0 vendas</div><div style="margin-top:1rem" id="comp-entrada-lista"></div></div>
+      <div class="card"><div class="card-label">💎 Produtos Premium (acima R$200)</div><div class="card-value" id="comp-premium-val">R$ 0</div><div class="card-sub" id="comp-premium-qtd">0 vendas</div><div style="margin-top:1rem" id="comp-premium-lista"></div></div>
+    </div>
+  </div>
+</div>
 
+<!-- ALERTAS -->
+<div class="page" id="page-alertas">
+  <div class="page-header"><h1>Alertas <span>Estratégicos</span></h1><p>O que fazer agora com base nos seus dados</p></div>
+  <div class="grid-2">
+    <div><div class="section-title">Ações Recomendadas</div><div id="alertas-acoes"><div class="empty-state"><div class="icon">💡</div><h3>Sem alertas ainda</h3><p>Importe seus dados</p></div></div></div>
+    <div><div class="section-title">Status dos Produtos</div><div id="alertas-produtos"><div class="empty-state"><div class="icon">📊</div><h3>Aguardando dados</h3></div></div></div>
+  </div>
+  <div class="card" style="margin-top:1rem">
+    <div class="section-title">Carrinho Abandonado — Oportunidades</div>
+    <div id="alertas-carrinho"><div class="empty-state"><div class="icon">🛒</div><h3>Nenhum dado de abandono</h3><p>Importe o relatório de carrinhos da Kiwify</p></div></div>
+  </div>
+</div>
+
+<!-- IMPORTAR -->
+<div class="page" id="page-importar">
+  <div class="page-header"><h1>Importar <span>CSV</span></h1><p>Relatórios exportados da Kiwify</p></div>
   <div class="drop-zone" id="drop-zone" onclick="document.getElementById('csv-input').click()">
-    <input type="file" id="csv-input" accept=".csv,.xls,.xlsx" multiple onchange="handleFiles(this.files)">
+    <input type="file" id="csv-input" accept=".csv" multiple onchange="handleFiles(this.files)">
     <div class="drop-zone-icon">📂</div>
     <h3>Arraste o CSV aqui ou clique para selecionar</h3>
     <p>Suporta relatórios de vendas e carrinhos abandonados da Kiwify (.csv)</p>
   </div>
-
   <div class="card" style="margin-bottom:1.5rem">
-    <h3 style="font-family:'Playfair Display',serif; font-style:italic; font-size:0.95rem; color:var(--brown); margin-bottom:0.8rem;">Colunas reconhecidas automaticamente</h3>
-    <p style="font-size:0.78rem; color:var(--gray); line-height:1.7;">
-      <strong>Vendas:</strong> data, produto, comprador, email, valor, status, forma de pagamento<br>
-      <strong>Carrinhos:</strong> data, produto, nome, email, status<br><br>
-      O sistema detecta os campos automaticamente — os nomes exatos das colunas não precisam ser idênticos.
+    <h3 style="font-family:'Playfair Display',serif;font-style:italic;font-size:.95rem;color:var(--brown);margin-bottom:.8rem;">Colunas reconhecidas automaticamente</h3>
+    <p style="font-size:.78rem;color:var(--gray);line-height:1.7">
+      <strong>Vendas:</strong> Status · Produto · Cliente · Email · Celular · Valor líquido · Data de Criação<br>
+      <strong>Carrinhos:</strong> Product name · Customer Name · Customer Email · Customer Phone · Creation Date
     </p>
   </div>
-
-  <div id="import-log" style="display:none">
-    <div class="section-title">Último import</div>
-    <div class="card">
-      <div id="import-log-content" style="font-size:0.82rem; color:var(--gray); line-height:1.8;"></div>
-    </div>
-  </div>
+  <div id="import-log" style="display:none"><div class="section-title">Último import</div><div class="card"><div id="import-log-content" style="font-size:.82rem;color:var(--gray);line-height:1.8"></div></div></div>
 </div>
 
-<!-- ======================== CONFIG ======================== -->
+<!-- CONFIG -->
 <div class="page" id="page-config">
-  <div class="page-header">
-    <h1><span>Configurações</span></h1>
-    <p>Ajuste metas e preferências do dashboard</p>
-  </div>
-
+  <div class="page-header"><h1><span>Configurações</span></h1><p>Ajuste metas e preferências</p></div>
   <div class="config-card">
     <h3>🎯 Meta de Faturamento</h3>
-    <div class="config-row">
-      <label>Meta Mensal (R$)</label>
-      <input type="number" id="cfg-meta" placeholder="Ex: 10000" value="10000">
-    </div>
+    <div class="config-row"><label>Meta Mensal (R$)</label><input type="number" id="cfg-meta" placeholder="Ex: 10000" value="10000"></div>
     <button class="btn btn-primary" onclick="salvarConfig()">Salvar Meta</button>
   </div>
-
   <div class="config-card">
     <h3>🏷️ Seus Produtos</h3>
-    <p style="font-size:0.78rem; color:var(--gray); margin-bottom:1rem;">Produtos cadastrados com base no seu ecossistema</p>
     <table class="data-table">
-      <thead>
-        <tr><th>Produto</th><th>Ticket</th><th>Nível</th></tr>
-      </thead>
+      <thead><tr><th>Produto</th><th>Ticket</th><th>Nível</th></tr></thead>
       <tbody>
-        <tr><td>Desafio Aquece Instagram</td><td>R$ 25 – 37</td><td><span class="badge badge-brown">Entrada</span></td></tr>
+        <tr><td>Desafio Aquece Instagram</td><td>R$ 25–37</td><td><span class="badge badge-brown">Entrada</span></td></tr>
         <tr><td>Fábrica de Ideias de Conteúdo</td><td>R$ 37</td><td><span class="badge badge-brown">Entrada</span></td></tr>
-        <tr><td>Friends da Criação</td><td>R$ 37 – 47</td><td><span class="badge badge-brown">Entrada</span></td></tr>
+        <tr><td>Friends da Criação</td><td>R$ 37–47</td><td><span class="badge badge-brown">Entrada</span></td></tr>
         <tr><td>Conteúdo Criativo com IA</td><td>R$ 47</td><td><span class="badge badge-brown">Entrada</span></td></tr>
-        <tr><td>MACI — Método Acelera e Cresce</td><td>R$ 97 – 147</td><td><span class="badge badge-black">Intermediário</span></td></tr>
-        <tr><td>Consultoria Estratégica</td><td>R$ 500 – 800</td><td><span class="badge badge-success">Premium</span></td></tr>
-        <tr><td>Mentoria ACES 3 meses</td><td>R$ 4.000 – 7.000</td><td><span class="badge badge-success">Premium</span></td></tr>
-        <tr><td>Mentoria ACES 6 meses</td><td>R$ 4.000 – 7.000</td><td><span class="badge badge-success">Premium</span></td></tr>
+        <tr><td>MACI — Método Acelera e Cresce</td><td>R$ 97–147</td><td><span class="badge badge-black">Intermediário</span></td></tr>
+        <tr><td>Consultoria Estratégica</td><td>R$ 500–800</td><td><span class="badge badge-success">Premium</span></td></tr>
+        <tr><td>Mentoria ACES 3 meses</td><td>R$ 4.000–7.000</td><td><span class="badge badge-success">Premium</span></td></tr>
+        <tr><td>Mentoria ACES 6 meses</td><td>R$ 4.000–7.000</td><td><span class="badge badge-success">Premium</span></td></tr>
       </tbody>
     </table>
   </div>
-
   <div class="config-card">
     <h3>🗑️ Dados</h3>
-    <p style="font-size:0.78rem; color:var(--gray); margin-bottom:1rem;">Remove todos os dados importados. Não pode ser desfeito.</p>
+    <p style="font-size:.78rem;color:var(--gray);margin-bottom:1rem">Remove todos os dados importados.</p>
     <button class="btn btn-outline" onclick="limparDados()">Limpar todos os dados</button>
   </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════
-// ESTADO GLOBAL
-// ══════════════════════════════════════════════════
-let state = {
-  vendas: [],
-  carrinhos: [],
-  meta: 10000,
-  charts: {}
-};
+// ESTADO
+var state = { vendas: [], carrinhos: [], meta: 10000 };
 
-// ══════════════════════════════════════════════════
 // NAVEGAÇÃO
-// ══════════════════════════════════════════════════
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(function(p) { p.style.display = 'none'; });
-  document.querySelectorAll('#nav-links a').forEach(function(a) { a.classList.remove('active'); });
-  var target = document.getElementById('page-' + id);
-  if (target) target.style.display = 'block';
-  var link = document.querySelector('#nav-links a[data-page="' + id + '"]');
-  if (link) link.classList.add('active');
+function nav(id, btn) {
+  var pgs = document.getElementsByClassName('page');
+  for (var i = 0; i < pgs.length; i++) pgs[i].style.display = 'none';
+  var btns = document.getElementsByClassName('nav-btn');
+  for (var j = 0; j < btns.length; j++) btns[j].className = 'nav-btn';
+  document.getElementById('page-' + id).style.display = 'block';
+  if (btn) btn.className = 'nav-btn active';
 }
 
-// Bind nav clicks — script está no final do body, DOM já está pronto
-document.querySelectorAll('#nav-links a[data-page]').forEach(function(link) {
-  link.style.cursor = 'pointer';
-  link.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    showPage(this.getAttribute('data-page'));
-  });
-});
+function setCompTab(tab, el) {
+  document.getElementById('comp-semana').style.display = tab === 'semana' ? '' : 'none';
+  document.getElementById('comp-mes').style.display = tab === 'mes' ? '' : 'none';
+  document.getElementById('comp-nivel').style.display = tab === 'nivel' ? '' : 'none';
+  var tabs = document.getElementsByClassName('comp-tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].className = 'comp-tab';
+  if (el) el.className = 'comp-tab active';
+}
 
-// Mostrar página inicial
-showPage('visao-geral');
-
-// ══════════════════════════════════════════════════
 // CONFIG
-// ══════════════════════════════════════════════════
 function salvarConfig() {
-  const v = parseFloat(document.getElementById('cfg-meta').value);
-  if (!isNaN(v) && v > 0) {
-    state.meta = v;
-    atualizarDashboard();
-    toast('Meta salva com sucesso!');
-  }
+  var v = parseFloat(document.getElementById('cfg-meta').value);
+  if (!isNaN(v) && v > 0) { state.meta = v; atualizar(); toast('Meta salva!'); }
 }
 
 function limparDados() {
-  if (confirm('Tem certeza? Todos os dados serão removidos.')) {
-    state.vendas = [];
-    state.carrinhos = [];
-    atualizarDashboard();
-    toast('Dados removidos');
+  if (confirm('Remover todos os dados?')) {
+    state.vendas = []; state.carrinhos = [];
+    atualizar(); toast('Dados removidos');
   }
 }
 
-// ══════════════════════════════════════════════════
-// CSV PARSER — KIWIFY COMPATIBLE
-// ══════════════════════════════════════════════════
-function parseCSVLine(line, sep) {
-  const result = [];
-  let current = '';
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
-      else inQuotes = !inQuotes;
-    } else if (ch === sep && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += ch;
+// CSV PARSER
+function splitCSV(line, sep) {
+  var res = [], cur = '', inQ = false;
+  for (var i = 0; i < line.length; i++) {
+    var c = line[i];
+    if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+    else if (c === sep && !inQ) { res.push(cur.trim()); cur = ''; }
+    else cur += c;
+  }
+  res.push(cur.trim());
+  return res;
+}
+
+function normH(s) {
+  return (s || '').replace(/"/g,'').trim().toLowerCase()
+    .replace(/[àáâã]/g,'a').replace(/[éê]/g,'e').replace(/[í]/g,'i')
+    .replace(/[óôõ]/g,'o').replace(/[ú]/g,'u').replace(/[ç]/g,'c');
+}
+
+function col(row, hdrs, keys) {
+  for (var k = 0; k < keys.length; k++) {
+    for (var h = 0; h < hdrs.length; h++) {
+      if (hdrs[h].indexOf(keys[k]) !== -1 && row[hdrs[h]] !== undefined && row[hdrs[h]] !== '') return row[hdrs[h]];
     }
-  }
-  result.push(current.trim());
-  return result;
-}
-
-function handleFiles(files) {
-  Array.from(files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      // remove BOM se existir
-      let text = e.target.result.replace(/^﻿/, '');
-      const linhas = text.trim().split(/\r?\n/);
-      if (linhas.length < 2) return;
-
-      // detectar separador
-      const primeiraLinha = linhas[0];
-      const sep = (primeiraLinha.split(';').length > primeiraLinha.split(',').length) ? ';' : ',';
-
-      const headers = parseCSVLine(primeiraLinha, sep).map(h =>
-        h.replace(/"/g,'').trim().toLowerCase()
-          .normalize('NFD').replace(/[̀-ͯ]/g,'') // remove acentos
-      );
-
-      const rows = linhas.slice(1)
-        .filter(l => l.trim())
-        .map(l => {
-          const vals = parseCSVLine(l, sep);
-          const obj = {};
-          headers.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g,'').trim());
-          return obj;
-        })
-        .filter(r => Object.values(r).some(v => v));
-
-      // detectar tipo pelo nome do arquivo ou por colunas
-      const nomeArq = file.name.toLowerCase();
-      const isCarrinho = nomeArq.includes('carrinho') || nomeArq.includes('abandon') || nomeArq.includes('cart') ||
-        headers.some(h => h.includes('abandon') || h.includes('carrinho'));
-
-      if (isCarrinho) {
-        const parsed = rows.map(r => parseCarrinho(r, headers));
-        state.carrinhos = [...state.carrinhos, ...parsed];
-        toast(`${parsed.length} carrinhos importados ✓`);
-      } else {
-        const parsed = rows.map(r => parseVenda(r, headers));
-        state.vendas = [...state.vendas, ...parsed];
-        toast(`${parsed.length} vendas importadas ✓`);
-      }
-
-      atualizarDashboard();
-      mostrarLog(file.name, rows.length, isCarrinho, headers);
-    };
-    reader.readAsText(file, 'UTF-8');
-  });
-}
-
-// busca coluna flexível: sem acento, substring
-function findCol(row, headers, candidates) {
-  for (const c of candidates) {
-    const key = headers.find(h => h.includes(c));
-    if (key && row[key] !== undefined && row[key] !== '') return row[key];
   }
   return '';
 }
 
-function parseStatus(raw) {
-  const s = (raw || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
-  if (s === 'paid' || s.includes('aprovado') || s.includes('aprovada') || s.includes('complete') || s.includes('conclu')) return 'approved';
-  if (s === 'refused' || s.includes('refus') || s.includes('recusad') || s.includes('declin') || s.includes('falh') || s.includes('cancelad')) return 'abandoned';
-  if (s.includes('reembolso') || s.includes('reembolsado') || s.includes('refund') || s.includes('chargeback') || s.includes('estorno')) return 'refunded';
-  if (s === 'waiting' || s.includes('aguard') || s.includes('pend') || s.includes('processing') || s.includes('wait')) return 'pending';
-  if (s.includes('abandon') || s.includes('nao finaliz')) return 'abandoned';
-  return 'pending'; // padrão seguro
+function getStatus(raw) {
+  var s = normH(raw);
+  if (s === 'paid' || s.indexOf('aprov') !== -1) return 'ok';
+  if (s === 'refused' || s.indexOf('refus') !== -1 || s.indexOf('recus') !== -1 || s.indexOf('declin') !== -1 || s.indexOf('cancel') !== -1) return 'no';
+  if (s.indexOf('reembolso') !== -1 || s.indexOf('refund') !== -1 || s.indexOf('chargeback') !== -1 || s.indexOf('estorno') !== -1) return 'ref';
+  if (s === 'waiting' || s.indexOf('aguard') !== -1 || s.indexOf('pend') !== -1 || s.indexOf('wait') !== -1) return 'pen';
+  return 'pen';
 }
 
-function parseVenda(row, headers) {
-  // Kiwify: "Valor líquido" → normalizado "valor liquido"
-  const valor_raw = findCol(row, headers, ['valor liquido','preco base','total com','valor bruto','valor','value','price','amount','total','receita']) || '0';
-  const valor = parseFloat(valor_raw.replace(/[^0-9,.]/g,'').replace(',','.')) || 0;
-
-  // Kiwify: "Data de Criação" → normalizado "data de criacao"
-  const data_raw = findCol(row, headers, ['data de criacao','data criacao','criado em','data da venda','creation date','data','created','date','hora']);
-  const data = parseData(data_raw);
-
-  // Kiwify: "Status" com valores "paid", "refused", "waiting", "refunded"
-  const status_raw = findCol(row, headers, ['status']);
-  const status = parseStatus(status_raw);
-
-  // Kiwify: "Produto", "Cliente"
-  const produto = findCol(row, headers, ['produto','product name','product','plano','plan','item','nome do produto']) || 'Produto';
-  const comprador = findCol(row, headers, ['cliente','customer name','nome do comprador','nome do cliente','comprador','nome','name','buyer']);
-  const email = findCol(row, headers, ['email','customer email','e-mail','mail']);
-  const pagamento = findCol(row, headers, ['pagamento','payment','metodo','forma de pagamento','tipo']);
-  const celular = findCol(row, headers, ['celular','phone','telefone','customer phone']);
-  const instagram = findCol(row, headers, ['instagram']);
-
-  return { data, produto, comprador, email, valor, status, pagamento, celular, instagram };
+function parseData(s) {
+  if (!s) return null;
+  s = s.replace(/"/g,'').trim();
+  var m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if (m) return new Date(m[3]+'-'+m[2]+'-'+m[1]);
+  m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return new Date(s.slice(0,10));
+  return null;
 }
 
-function parseCarrinho(row, headers) {
-  // Kiwify carts: "Product name", "Customer Name", "Customer Email", "Creation Date"
-  const data_raw = findCol(row, headers, ['creation date','criado em','data','date','created']);
-  const produto = findCol(row, headers, ['product name','produto','product','plano','item']) || 'Produto';
-  const nome = findCol(row, headers, ['customer name','nome','name','comprador','cliente']);
-  const email = findCol(row, headers, ['customer email','email','e-mail','mail']);
-  const celular = findCol(row, headers, ['customer phone','celular','phone','telefone']);
-  return { data: parseData(data_raw), produto, nome, comprador: nome, email, celular, valor: 0, status: 'abandoned' };
+function fmtNum(n) {
+  n = (n || '').replace(/\D/g,'');
+  if (n.length >= 10 && n.slice(0,2) !== '55') n = '55' + n;
+  return n;
 }
 
-function parseData(str) {
-  if (!str) return new Date();
-  const limpo = str.replace(/"/g,'').trim();
-  // dd/mm/yyyy hh:mm ou dd/mm/yyyy
-  const m1 = limpo.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-  if (m1) return new Date(`${m1[3]}-${m1[2]}-${m1[1]}`);
-  // yyyy-mm-dd
-  const m2 = limpo.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (m2) return new Date(limpo.slice(0,10));
-  // dd-mm-yyyy
-  const m3 = limpo.match(/(\d{2})-(\d{2})-(\d{4})/);
-  if (m3) return new Date(`${m3[3]}-${m3[2]}-${m3[1]}`);
-  return new Date();
+function handleFiles(files) {
+  for (var i = 0; i < files.length; i++) {
+    (function(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var txt = e.target.result.replace(/^﻿/,'');
+        var linhas = txt.trim().split(/\r?\n/);
+        if (linhas.length < 2) { toast('Arquivo vazio'); return; }
+        var sep = linhas[0].split(';').length > linhas[0].split(',').length ? ';' : ',';
+        var hdrs = splitCSV(linhas[0], sep).map(normH);
+        var rows = [];
+        for (var r = 1; r < linhas.length; r++) {
+          if (!linhas[r].trim()) continue;
+          var vals = splitCSV(linhas[r], sep);
+          var obj = {};
+          for (var h = 0; h < hdrs.length; h++) obj[hdrs[h]] = (vals[h] || '').replace(/^"|"$/g,'').trim();
+          rows.push(obj);
+        }
+        var fn = file.name.toLowerCase();
+        var isCart = fn.indexOf('cart') !== -1 || fn.indexOf('carrinho') !== -1 ||
+          hdrs.some(function(h){return h.indexOf('cart id') !== -1 || h === 'cart id';});
+
+        if (isCart) {
+          var parsed = rows.map(function(r) {
+            return {
+              nome: col(r,hdrs,['customer name','nome','name','comprador']),
+              email: col(r,hdrs,['customer email','email','e-mail']),
+              celular: fmtNum(col(r,hdrs,['customer phone','celular','phone','telefone'])),
+              produto: col(r,hdrs,['product name','produto','product','plano']) || 'Produto',
+              valor: 0, status: 'no',
+              data: parseData(col(r,hdrs,['creation date','criado em','data','date','created']))
+            };
+          });
+          state.carrinhos = state.carrinhos.concat(parsed);
+          toast(parsed.length + ' carrinhos importados ✓');
+          addLog('✅ ' + file.name + ' — ' + parsed.length + ' carrinhos abandonados');
+        } else {
+          var parsed = rows.map(function(r) {
+            var vRaw = col(r,hdrs,['valor liquido','valor bruto','preco base','total com','valor','value','price']);
+            var v = parseFloat(vRaw.replace(/[^0-9,.]/g,'').replace(',','.')) || 0;
+            return {
+              nome: col(r,hdrs,['cliente','customer name','nome do comprador','nome','name','comprador']),
+              email: col(r,hdrs,['email','customer email','e-mail']),
+              celular: fmtNum(col(r,hdrs,['celular','customer phone','phone','telefone'])),
+              produto: col(r,hdrs,['produto','product name','product','plano']) || 'Produto',
+              valor: v,
+              status: getStatus(col(r,hdrs,['status'])),
+              data: parseData(col(r,hdrs,['data de criacao','criado em','data','date','creation date']))
+            };
+          });
+          state.vendas = state.vendas.concat(parsed);
+          toast(parsed.length + ' vendas importadas ✓');
+          addLog('✅ ' + file.name + ' — ' + parsed.length + ' vendas');
+        }
+        atualizar();
+      };
+      reader.readAsText(file, 'UTF-8');
+    })(files[i]);
+  }
 }
 
-function mostrarLog(nome, qtd, isCarrinho, headers) {
-  const logEl = document.getElementById('import-log');
-  const content = document.getElementById('import-log-content');
-  logEl.style.display = 'block';
-  const tipo = isCarrinho ? 'carrinhos abandonados' : 'vendas';
-  content.innerHTML += `✅ <strong>${nome}</strong> — ${qtd} linhas como <em>${tipo}</em> · Colunas: ${headers.slice(0,5).join(', ')}…<br>`;
-}
+// DRAG DROP
+var dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', function(e){e.preventDefault();dz.classList.add('drag-over');});
+dz.addEventListener('dragleave', function(){dz.classList.remove('drag-over');});
+dz.addEventListener('drop', function(e){e.preventDefault();dz.classList.remove('drag-over');handleFiles(e.dataTransfer.files);});
 
-// ══════════════════════════════════════════════════
-// DRAG & DROP
-// ══════════════════════════════════════════════════
-const dz = document.getElementById('drop-zone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-dz.addEventListener('drop', e => {
-  e.preventDefault();
-  dz.classList.remove('drag-over');
-  handleFiles(e.dataTransfer.files);
-});
+// ATUALIZAR
+function atualizar() {
+  var aprov = [], nao = [], ref = [], pen = [];
+  for (var i = 0; i < state.vendas.length; i++) {
+    var v = state.vendas[i];
+    if (v.status === 'ok') aprov.push(v);
+    else if (v.status === 'no') nao.push(v);
+    else if (v.status === 'ref') ref.push(v);
+    else pen.push(v);
+  }
+  var fat = 0; for (var i = 0; i < aprov.length; i++) fat += aprov[i].valor;
+  var ticket = aprov.length ? fat / aprov.length : 0;
+  var abandon = nao.length + state.carrinhos.length;
+  var totalLeads = state.vendas.length + state.carrinhos.length;
+  var txAbandono = totalLeads ? Math.round(abandon / totalLeads * 100) : 0;
+  var pct = Math.min(Math.round(fat / state.meta * 100), 100);
 
-// ══════════════════════════════════════════════════
-// ATUALIZAR DASHBOARD
-// ══════════════════════════════════════════════════
-function atualizarDashboard() {
-  const aprovadas = state.vendas.filter(v => v.status === 'approved');
-  const faturamento = aprovadas.reduce((s, v) => s + v.valor, 0);
-  const ticket = aprovadas.length > 0 ? faturamento / aprovadas.length : 0;
-  const reembolsos = state.vendas.filter(v => v.status === 'refunded');
-  const abandonados = state.vendas.filter(v => v.status === 'abandoned');
-  const totalCarrinhos = aprovadas.length + abandonados.length + state.carrinhos.length;
-  const totalAbandonados = abandonados.length + state.carrinhos.length;
-  const txAbandono = totalCarrinhos > 0 ? Math.round((totalAbandonados / totalCarrinhos) * 100) : 0;
-
-  // Nav
-  document.getElementById('nav-faturado').textContent = fmt(faturamento);
-
-  // Meta
-  const pct = Math.min(Math.round((faturamento / state.meta) * 100), 100);
-  document.getElementById('vg-faturado').textContent = fmt(faturamento);
-  document.getElementById('vg-vendas-count').textContent = `${aprovadas.length} vendas fechadas`;
-  document.getElementById('vg-pct').textContent = pct + '%';
-  document.getElementById('vg-meta-pct-label').textContent = pct + '%';
+  document.getElementById('nav-faturado').innerHTML = fmt(fat);
+  document.getElementById('vg-faturado').innerHTML = fmt(fat);
+  document.getElementById('vg-vendas-count').innerHTML = aprov.length + ' vendas fechadas';
+  document.getElementById('vg-pct').innerHTML = pct + '%';
+  document.getElementById('vg-meta-pct-label').innerHTML = pct + '%';
   document.getElementById('vg-progress').style.width = pct + '%';
-  const falta = state.meta - faturamento;
-  document.getElementById('vg-meta-falta').textContent =
-    falta > 0
-      ? `Faltam ${fmt(falta)} para a meta de ${fmt(state.meta)}`
-      : `🎉 Meta atingida! Faturamento: ${fmt(faturamento)}`;
-  document.getElementById('vg-meta-label').textContent = `Meta — ${fmt(state.meta)}`;
+  document.getElementById('vg-meta-label').innerHTML = 'Meta — ' + fmt(state.meta);
+  var falta = state.meta - fat;
+  document.getElementById('vg-meta-falta').innerHTML = falta > 0 ? 'Faltam ' + fmt(falta) + ' para a meta' : '🎉 Meta atingida!';
+  document.getElementById('vg-ticket').innerHTML = fmt(ticket);
+  document.getElementById('vg-leads').innerHTML = totalLeads;
+  document.getElementById('vg-abandonados').innerHTML = abandon;
+  document.getElementById('vg-tx-abandono').innerHTML = 'taxa de abandono: ' + txAbandono + '%';
+  document.getElementById('vg-subtitle').innerHTML = aprov.length + ' vendas · ' + Object.keys(porProd(aprov)).length + ' produtos';
 
-  // KPIs
-  document.getElementById('vg-ticket').textContent = fmt(ticket);
-  document.getElementById('vg-leads').textContent = totalCarrinhos;
-  document.getElementById('vg-abandonados').textContent = totalAbandonados;
-  document.getElementById('vg-tx-abandono').textContent = `taxa de abandono: ${txAbandono}%`;
+  // pipeline
+  document.getElementById('pip-leads').innerHTML = totalLeads;
+  document.getElementById('pip-aprovados').innerHTML = aprov.length;
+  document.getElementById('pip-aprovados-val').innerHTML = fmt(fat);
+  document.getElementById('pip-fechados').innerHTML = aprov.length;
+  document.getElementById('pip-fechados-val').innerHTML = fmt(fat);
+  document.getElementById('pip-abandonados').innerHTML = abandon;
+  document.getElementById('pip-tx-conv').innerHTML = 'tx: ' + (totalLeads ? Math.round(aprov.length/totalLeads*100) : 0) + '%';
+  document.getElementById('pip-reembolsos').innerHTML = ref.length;
+  var refFat = 0; for (var i=0;i<ref.length;i++) refFat+=ref[i].valor;
+  document.getElementById('pip-reembolsos-val').innerHTML = fmt(refFat);
 
-  // Pipeline
-  document.getElementById('pip-leads').textContent = totalCarrinhos;
-  document.getElementById('pip-aprovados').textContent = aprovadas.length;
-  document.getElementById('pip-aprovados-val').textContent = fmt(faturamento);
-  document.getElementById('pip-fechados').textContent = aprovadas.length;
-  document.getElementById('pip-fechados-val').textContent = fmt(faturamento);
-  document.getElementById('pip-abandonados').textContent = totalAbandonados;
-  document.getElementById('pip-tx-conv').textContent = `tx: ${totalCarrinhos > 0 ? Math.round((aprovadas.length / totalCarrinhos) * 100) : 0}%`;
-  document.getElementById('pip-reembolsos').textContent = reembolsos.length;
-  document.getElementById('pip-reembolsos-val').textContent = fmt(reembolsos.reduce((s,v) => s+v.valor, 0));
+  // produtos
+  var pp = porProd(aprov);
+  var sorted = [];
+  for (var k in pp) sorted.push([k, pp[k]]);
+  sorted.sort(function(a,b){return b[1].t - a[1].t;});
 
-  // Produtos
-  const porProduto = agruparPorProduto(aprovadas);
-  const sorted = Object.entries(porProduto).sort((a,b) => b[1].total - a[1].total);
-
-  if (sorted.length > 0) {
-    const top = sorted[0];
-    document.getElementById('vg-top-produto').textContent = top[0].length > 18 ? top[0].slice(0,16)+'…' : top[0];
-    document.getElementById('vg-top-produto-val').textContent = fmt(top[1].total) + ' faturado';
-    document.getElementById('vg-subtitle').textContent = `${aprovadas.length} vendas · ${Object.keys(porProduto).length} produtos`;
+  if (sorted.length) {
+    var top = sorted[0];
+    document.getElementById('vg-top-produto').innerHTML = top[0].length > 18 ? top[0].slice(0,16)+'…' : top[0];
+    document.getElementById('vg-top-produto-val').innerHTML = fmt(top[1].t) + ' faturado';
+    document.getElementById('produto-list').innerHTML = sorted.map(function(e) {
+      var p = fat > 0 ? Math.round(e[1].t/fat*100) : 0;
+      return '<div class="produto-row"><div class="nome">'+e[0]+'</div><div class="qtd">'+e[1].q+'x</div>'
+        +'<div class="produto-bar-wrap"><div class="produto-bar" style="width:'+p+'%"></div></div>'
+        +'<div class="valor">'+fmt(e[1].t)+'</div></div>';
+    }).join('');
   }
 
-  renderProdutoList(sorted, faturamento);
-  renderGraficoProdutos(sorted);
-  renderGraficoTimeline(aprovadas);
-  renderComparativos(aprovadas);
-  renderAlertas(sorted, faturamento, totalAbandonados, aprovadas);
+  // vendas tabela
   renderTabelaVendas();
+  // leads
+  renderLeadsKPIs();
   renderLeads();
+  // comparativos
+  renderComparativos(aprov);
+  // alertas
+  renderAlertas(sorted, fat, abandon, aprov);
 }
 
-// ══════════════════════════════════════════════════
+function porProd(vendas) {
+  var m = {};
+  for (var i = 0; i < vendas.length; i++) {
+    var v = vendas[i];
+    if (!m[v.produto]) m[v.produto] = {t:0,q:0};
+    m[v.produto].t += v.valor; m[v.produto].q++;
+  }
+  return m;
+}
+
+// VENDAS TABELA
+function renderTabelaVendas() {
+  var filtro = document.getElementById('filter-status').value;
+  var lista = filtro === 'todos' ? state.vendas.slice() : state.vendas.filter(function(v){return v.status===filtro;});
+  lista.sort(function(a,b){return (b.data||0)-(a.data||0);});
+  var tbody = document.getElementById('tbody-vendas');
+  if (!lista.length) {
+    tbody.innerHTML='<tr><td colspan="5"><div class="empty-state"><div class="icon">🛒</div><h3>Nenhuma venda</h3><p>Importe o CSV da Kiwify</p></div></td></tr>';return;
+  }
+  var labels = {ok:['badge-ok','Aprovada'],no:['badge-no','Recusada'],ref:['badge-ref','Reembolso'],pen:['badge-pen','Pendente']};
+  tbody.innerHTML = lista.map(function(v) {
+    var d = v.data && !isNaN(v.data) ? v.data.toLocaleDateString('pt-BR') : '—';
+    var lb = labels[v.status] || ['badge-pen','—'];
+    return '<tr><td>'+d+'</td><td>'+v.produto+'</td><td>'+(v.nome||v.email||'—')+'</td>'
+      +'<td style="font-family:\'Playfair Display\',serif;font-style:italic;font-weight:600;color:var(--brown)">'+fmt(v.valor)+'</td>'
+      +'<td><span class="badge '+lb[0]+'">'+lb[1]+'</span></td></tr>';
+  }).join('');
+}
+function filtrarVendas(){renderTabelaVendas();}
+
 // LEADS
-// ══════════════════════════════════════════════════
+function renderLeadsKPIs() {
+  var todos = state.vendas.concat(state.carrinhos);
+  var comp=0,nao=0,ref=0;
+  todos.forEach(function(l){if(l.status==='ok')comp++;else if(l.status==='ref')ref++;else nao++;});
+  document.getElementById('l-comp').innerHTML = comp;
+  document.getElementById('l-nao').innerHTML = nao;
+  document.getElementById('l-ref').innerHTML = ref;
+  document.getElementById('l-conv').innerHTML = (todos.length?Math.round(comp/todos.length*100):0)+'%';
+}
+
 function renderLeads() {
-  const busca = (document.getElementById('leads-search')?.value || '').toLowerCase();
-  const filtro = document.getElementById('leads-filter')?.value || 'todos';
-
-  // juntar todos os contatos: aprovadas + pendentes + abandonadas + carrinhos
-  const todosContatos = [
-    ...state.vendas,
-    ...state.carrinhos
-  ];
-
-  // deduplicar por email (prioriza aprovados)
-  const mapaEmail = {};
-  todosContatos.forEach(c => {
-    const chave = (c.email || c.comprador || Math.random()).toString().toLowerCase();
-    if (!mapaEmail[chave]) {
-      mapaEmail[chave] = c;
-    } else {
-      // se já existe, manter o aprovado
-      if (c.status === 'approved') mapaEmail[chave] = c;
-    }
+  var busca = (document.getElementById('l-busca').value||'').toLowerCase();
+  var fil = document.getElementById('l-fil').value;
+  var lista = state.vendas.concat(state.carrinhos);
+  if (fil) lista = lista.filter(function(l){return l.status===fil;});
+  if (busca) lista = lista.filter(function(l){
+    return (l.nome||'').toLowerCase().indexOf(busca)!==-1||(l.email||'').toLowerCase().indexOf(busca)!==-1||(l.produto||'').toLowerCase().indexOf(busca)!==-1;
   });
-
-  let lista = Object.values(mapaEmail);
-
-  // KPIs
-  const compraram = lista.filter(l => l.status === 'approved').length;
-  const naoCompraram = lista.filter(l => l.status !== 'approved' && l.status !== 'refunded').length;
-  const txConv = lista.length > 0 ? Math.round((compraram / lista.length) * 100) : 0;
-  document.getElementById('leads-compraram').textContent = compraram;
-  document.getElementById('leads-nao-compraram').textContent = naoCompraram;
-  document.getElementById('leads-tx-conv').textContent = txConv + '%';
-
-  // filtrar
-  if (filtro === 'comprou') lista = lista.filter(l => l.status === 'approved');
-  else if (filtro === 'nao-comprou') lista = lista.filter(l => l.status !== 'approved' && l.status !== 'refunded');
-  else if (filtro === 'reembolso') lista = lista.filter(l => l.status === 'refunded');
-
-  // busca
-  if (busca) {
-    lista = lista.filter(l =>
-      (l.comprador || l.nome || '').toLowerCase().includes(busca) ||
-      (l.email || '').toLowerCase().includes(busca) ||
-      (l.produto || '').toLowerCase().includes(busca)
-    );
+  lista.sort(function(a,b){var o={ok:0,pen:1,no:2,ref:3};return(o[a.status]||9)-(o[b.status]||9);});
+  var tbody = document.getElementById('tbody-leads');
+  if (!lista.length) {
+    tbody.innerHTML='<tr><td colspan="8"><div class="empty-state"><div class="icon">👥</div><h3>Nenhum lead</h3><p>Importe os CSVs da Kiwify</p></div></td></tr>';return;
   }
-
-  // ordenar: aprovados primeiro
-  lista.sort((a,b) => {
-    const ord = {approved:0, refunded:1, pending:2, abandoned:3};
-    return (ord[a.status]||9) - (ord[b.status]||9);
-  });
-
-  const tbody = document.getElementById('tbody-leads');
-  if (lista.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="icon">👥</div><h3>Nenhum lead encontrado</h3><p>Importe o CSV da Kiwify para ver seus leads</p></div></td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = lista.map(l => {
-    const nome = l.comprador || l.nome || '—';
-    const email = l.email || '—';
-    const celular = l.celular || '—';
-    const produto = l.produto || '—';
-    const dataStr = l.data instanceof Date && !isNaN(l.data) ? l.data.toLocaleDateString('pt-BR') : '—';
-
-    let badgeHtml, rowStyle = '';
-    if (l.status === 'approved') {
-      badgeHtml = `<span class="badge badge-success">✅ Comprou</span>`;
-    } else if (l.status === 'refunded') {
-      badgeHtml = `<span class="badge" style="background:#FFF0F0;color:#8B4343">↩ Reembolso</span>`;
-    } else if (l.status === 'pending') {
-      badgeHtml = `<span class="badge badge-black">⏳ Pendente</span>`;
-    } else {
-      badgeHtml = `<span class="badge badge-brown">🛒 Não comprou</span>`;
-      rowStyle = 'opacity:0.85';
-    }
-
-    const valorStr = l.valor > 0
-      ? `<span style="font-family:'Playfair Display',serif;font-style:italic;font-weight:600;color:var(--brown)">${fmt(l.valor)}</span>`
-      : `<span style="color:var(--gray-light)">—</span>`;
-
-    return `<tr style="${rowStyle}">
-      <td>${badgeHtml}</td>
-      <td><strong>${nome}</strong></td>
-      <td style="color:var(--gray);font-size:0.78rem">${email}</td>
-      <td style="color:var(--gray);font-size:0.78rem">${celular}</td>
-      <td>${produto}</td>
-      <td>${valorStr}</td>
-      <td style="color:var(--gray-light);font-size:0.78rem">${dataStr}</td>
-    </tr>`;
+  var labels = {ok:['badge-ok','✅ Comprou'],no:['badge-no','🛒 Não comprou'],ref:['badge-ref','↩ Reembolso'],pen:['badge-pen','⏳ Pendente']};
+  tbody.innerHTML = lista.map(function(l) {
+    var lb = labels[l.status]||['badge-pen','—'];
+    var d = l.data && !isNaN(l.data) ? l.data.toLocaleDateString('pt-BR') : '—';
+    var v = l.valor>0?'<span style="font-family:\'Playfair Display\',serif;font-style:italic;font-weight:600;color:var(--brown)">'+fmt(l.valor)+'</span>':'<span style="color:var(--gray-light)">—</span>';
+    var num=(l.celular||'').replace(/\D/g,'');
+    var wa=num.length>=10?'<a class="whats-btn" href="https://wa.me/'+num+'" target="_blank">💬 WA</a>':'<span style="color:var(--gray-light);font-size:.75rem">—</span>';
+    return '<tr><td><span class="badge '+lb[0]+'">'+lb[1]+'</span></td>'
+      +'<td><strong>'+(l.nome||'—')+'</strong></td>'
+      +'<td style="color:var(--gray);font-size:.78rem">'+(l.email||'—')+'</td>'
+      +'<td style="color:var(--gray);font-size:.78rem">'+(l.celular||'—')+'</td>'
+      +'<td>'+(l.produto||'—')+'</td>'
+      +'<td>'+v+'</td>'
+      +'<td style="color:var(--gray-light);font-size:.78rem">'+d+'</td>'
+      +'<td>'+wa+'</td></tr>';
   }).join('');
 }
 
-function agruparPorProduto(vendas) {
-  const map = {};
-  vendas.forEach(v => {
-    if (!map[v.produto]) map[v.produto] = { total: 0, qtd: 0 };
-    map[v.produto].total += v.valor;
-    map[v.produto].qtd++;
-  });
-  return map;
-}
-
-function renderProdutoList(sorted, totalFat) {
-  const el = document.getElementById('produto-list');
-  if (sorted.length === 0) {
-    el.innerHTML = `<div class="empty-state"><div class="icon">📦</div><h3>Nenhum dado ainda</h3><p>Importe o CSV da Kiwify para visualizar</p></div>`;
-    return;
-  }
-  el.innerHTML = sorted.map(([nome, d]) => {
-    const pct = totalFat > 0 ? Math.round((d.total / totalFat) * 100) : 0;
-    return `
-    <div class="produto-row">
-      <div class="nome">${nome}</div>
-      <div class="qtd">${d.qtd}x</div>
-      <div class="produto-bar-wrap"><div class="produto-bar" style="width:${pct}%"></div></div>
-      <div class="valor">${fmt(d.total)}</div>
-    </div>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════════════════
-// GRÁFICOS
-// ══════════════════════════════════════════════════
-const BROWNS = ['#8B6343','#B08B6E','#C4A882','#D4B89A','#E2CEB8','#6B4D33','#A07850','#BCA080'];
-
-function destroyChart(id) {
-  if (state.charts[id]) { state.charts[id].destroy(); delete state.charts[id]; }
-}
-
-function renderGraficoProdutos(sorted) {
-  destroyChart('produtos');
-  const ctx = document.getElementById('chart-produtos').getContext('2d');
-  if (sorted.length === 0) return;
-  state.charts['produtos'] = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: sorted.map(([n]) => n.length > 20 ? n.slice(0,18)+'…' : n),
-      datasets: [{ data: sorted.map(([,d]) => d.total), backgroundColor: BROWNS, borderWidth: 2, borderColor: '#fff' }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right', labels: { font: { size: 11, family: 'Inter' }, color: '#6B6560', boxWidth: 12 } },
-        tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.parsed)}` } }
-      }
-    }
-  });
-}
-
-function renderGraficoTimeline(aprovadas) {
-  destroyChart('timeline');
-  const ctx = document.getElementById('chart-timeline').getContext('2d');
-  if (aprovadas.length === 0) return;
-
-  const byDay = {};
-  aprovadas.forEach(v => {
-    const key = v.data instanceof Date && !isNaN(v.data)
-      ? v.data.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' })
-      : '??';
-    if (!byDay[key]) byDay[key] = 0;
-    byDay[key] += v.valor;
-  });
-
-  const labels = Object.keys(byDay).slice(-30);
-  const data = labels.map(l => byDay[l]);
-
-  state.charts['timeline'] = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        data,
-        borderColor: '#8B6343',
-        backgroundColor: 'rgba(139,99,67,0.08)',
-        fill: true,
-        tension: 0.4,
-        pointBackgroundColor: '#8B6343',
-        pointRadius: 3
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${fmt(ctx.parsed.y)}` } } },
-      scales: {
-        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9E9890' } },
-        y: { grid: { color: '#EDE8E0' }, ticks: { font: { size: 10 }, color: '#9E9890', callback: v => 'R$' + (v/1000).toFixed(0)+'k' } }
-      }
-    }
-  });
-}
-
-// ══════════════════════════════════════════════════
 // COMPARATIVOS
-// ══════════════════════════════════════════════════
-let compTab = 'semana';
+function renderComparativos(aprov) {
+  var hoje = new Date();
+  var inicioSA = new Date(hoje); inicioSA.setDate(hoje.getDate()-hoje.getDay());
+  var inicioSAnt = new Date(inicioSA); inicioSAnt.setDate(inicioSA.getDate()-7);
+  var sa=[], sant=[];
+  aprov.forEach(function(v){
+    if(!v.data) return;
+    if(v.data>=inicioSA) sa.push(v);
+    else if(v.data>=inicioSAnt) sant.push(v);
+  });
+  var saFat=0; sa.forEach(function(v){saFat+=v.valor;});
+  var santFat=0; sant.forEach(function(v){santFat+=v.valor;});
+  document.getElementById('comp-semana-atual').innerHTML=fmt(saFat);
+  document.getElementById('comp-semana-atual-qtd').innerHTML=sa.length+' vendas';
+  document.getElementById('comp-semana-ant').innerHTML=fmt(santFat);
+  document.getElementById('comp-semana-ant-qtd').innerHTML=sant.length+' vendas';
 
-function setCompTab(tab, el) {
-  compTab = tab;
-  document.querySelectorAll('.comp-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('comp-semana').style.display = tab === 'semana' ? '' : 'none';
-  document.getElementById('comp-mes').style.display = tab === 'mes' ? '' : 'none';
-  document.getElementById('comp-nivel').style.display = tab === 'nivel' ? '' : 'none';
+  // meses
+  var meses={}, mNomes=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  aprov.forEach(function(v){if(!v.data)return;var k=mNomes[v.data.getMonth()]+'/'+String(v.data.getFullYear()).slice(2);if(!meses[k])meses[k]={t:0,q:0};meses[k].t+=v.valor;meses[k].q++;});
+  var mesList=''; var mMax=0;
+  for(var k in meses) if(meses[k].t>mMax) mMax=meses[k].t;
+  for(var k in meses){var p=mMax?Math.round(meses[k].t/mMax*100):0;mesList+='<div style="display:flex;align-items:center;gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--cream-dark)"><div style="min-width:60px;font-size:.82rem;font-weight:500">'+k+'</div><div style="flex:1;background:var(--cream-dark);border-radius:99px;height:8px"><div style="width:'+p+'%;background:var(--brown);height:100%;border-radius:99px"></div></div><div style="font-family:\'Playfair Display\',serif;font-style:italic;color:var(--brown);font-weight:600;min-width:80px;text-align:right">'+fmt(meses[k].t)+'</div><div style="font-size:.75rem;color:var(--gray-light);min-width:40px">'+meses[k].q+'x</div></div>';}
+  document.getElementById('comp-mes-lista').innerHTML=mesList||'<div class="empty-state"><div class="icon">📅</div><h3>Sem dados</h3></div>';
+
+  // nivel
+  var ent=aprov.filter(function(v){return v.valor<=200;}), prem=aprov.filter(function(v){return v.valor>200;});
+  var entFat=0; ent.forEach(function(v){entFat+=v.valor;});
+  var premFat=0; prem.forEach(function(v){premFat+=v.valor;});
+  document.getElementById('comp-entrada-val').innerHTML=fmt(entFat);
+  document.getElementById('comp-entrada-qtd').innerHTML=ent.length+' vendas · até R$ 200';
+  document.getElementById('comp-premium-val').innerHTML=fmt(premFat);
+  document.getElementById('comp-premium-qtd').innerHTML=prem.length+' vendas · acima R$ 200';
+  var entPP=porProd(ent), premPP=porProd(prem);
+  document.getElementById('comp-entrada-lista').innerHTML=Object.keys(entPP).map(function(n){return '<div class="produto-row"><div class="nome">'+n+'</div><div class="valor">'+fmt(entPP[n].t)+'</div></div>';}).join('')||'<p style="font-size:.78rem;color:var(--gray)">Nenhum</p>';
+  document.getElementById('comp-premium-lista').innerHTML=Object.keys(premPP).map(function(n){return '<div class="produto-row"><div class="nome">'+n+'</div><div class="valor">'+fmt(premPP[n].t)+'</div></div>';}).join('')||'<p style="font-size:.78rem;color:var(--gray)">Nenhum</p>';
 }
 
-function renderComparativos(aprovadas) {
-  // Semana
-  const hoje = new Date();
-  const inicioSemanaAtual = new Date(hoje); inicioSemanaAtual.setDate(hoje.getDate() - hoje.getDay());
-  const inicioSemanaAnt = new Date(inicioSemanaAtual); inicioSemanaAnt.setDate(inicioSemanaAtual.getDate() - 7);
-  const fimSemanaAnt = new Date(inicioSemanaAtual); fimSemanaAnt.setDate(inicioSemanaAtual.getDate() - 1);
+// ALERTAS
+function renderAlertas(sorted, fat, abandon, aprov) {
+  var el=document.getElementById('alertas-acoes');
+  var ps=document.getElementById('alertas-produtos');
+  var ca=document.getElementById('alertas-carrinho');
+  if(!sorted.length){
+    el.innerHTML='<div class="empty-state"><div class="icon">💡</div><h3>Sem alertas</h3><p>Importe seus dados</p></div>';
+    ps.innerHTML='<div class="empty-state"><div class="icon">📊</div><h3>Aguardando dados</h3></div>';
+    ca.innerHTML='<div class="empty-state"><div class="icon">🛒</div><h3>Nenhum dado de abandono</h3></div>';
+    return;
+  }
+  var pct=fat/state.meta; var html='';
+  if(pct<0.3) html+=mkAlerta('atencao','⚠️','Faturamento abaixo de 30% da meta','Considere ativar uma oferta relâmpago ou campanha de reativação esta semana.');
+  else if(pct<0.7) html+=mkAlerta('oferta','🔥','Produto mais forte: '+sorted[0][0],'Crie conteúdo de fundo de funil direcionado para ele essa semana.');
+  if(pct>=0.7&&pct<1) html+=mkAlerta('funil','🎯','Você está perto da meta!',fmt(state.meta-fat)+' para bater. Faça uma ação de urgência real.');
+  if(abandon>5) html+=mkAlerta('atencao','🛒',abandon+' carrinhos abandonados','Ative uma sequência de follow-up via WhatsApp para esses leads.');
+  if(sorted.length>1) html+=mkAlerta('reativar','💤','Reativar: '+sorted[sorted.length-1][0],'Produto com menor faturamento. Precisa de conteúdo ou oferta de reativação.');
+  el.innerHTML=html||mkAlerta('funil','✅','Tudo nos eixos','Nenhum alerta crítico no momento.');
+  var maxQ=sorted[0][1].q;
+  ps.innerHTML=sorted.map(function(e){
+    var p=e[1].q/maxQ; var tp='oferta',ic='🔥',ds='Produto forte — mantenha conteúdo ativo';
+    if(p<0.3){tp='reativar';ic='💤';ds='Baixo volume — precisa de ativação';}
+    else if(p<0.6){tp='funil';ic='📈';ds='Em crescimento — invista em conteúdo';}
+    return mkAlerta(tp,ic,e[0]+' · '+e[1].q+' vendas',fmt(e[1].t)+' faturado. '+ds);
+  }).join('');
+  var todosAbandon=state.vendas.filter(function(v){return v.status==='no';}).concat(state.carrinhos);
+  if(!todosAbandon.length){ca.innerHTML='<div class="empty-state"><div class="icon">✅</div><h3>Nenhum abandono</h3></div>';return;}
+  ca.innerHTML='<p style="font-size:.82rem;color:var(--gray);margin-bottom:1rem">'+todosAbandon.length+' leads não finalizaram. Priorize follow-up por WhatsApp.</p>'
+    +'<table class="data-table"><thead><tr><th>Produto</th><th>Nome / Email</th><th>Celular</th><th>Data</th></tr></thead><tbody>'
+    +todosAbandon.slice(0,15).map(function(c){
+      var d=c.data&&!isNaN(c.data)?c.data.toLocaleDateString('pt-BR'):'—';
+      var num=(c.celular||'').replace(/\D/g,'');
+      var wa=num.length>=10?'<a class="whats-btn" href="https://wa.me/'+num+'" target="_blank">💬 WA</a>':'—';
+      return '<tr><td>'+c.produto+'</td><td>'+(c.nome||c.email||'—')+'</td><td>'+wa+'</td><td style="color:var(--gray-light);font-size:.78rem">'+d+'</td></tr>';
+    }).join('')+'</tbody></table>'
+    +(todosAbandon.length>15?'<p style="font-size:.75rem;color:var(--gray-light);margin-top:.75rem">+ '+(todosAbandon.length-15)+' outros</p>':'');
+}
 
-  const sa = aprovadas.filter(v => v.data >= inicioSemanaAtual);
-  const sant = aprovadas.filter(v => v.data >= inicioSemanaAnt && v.data < inicioSemanaAtual);
+function mkAlerta(tipo,icon,titulo,desc){
+  return '<div class="alerta '+tipo+'"><div class="alerta-icon">'+icon+'</div><div><div class="alerta-titulo">'+titulo+'</div><div class="alerta-desc">'+desc+'</div></div></div>';
+}
 
-  document.getElementById('comp-semana-atual').textContent = fmt(sa.reduce((s,v)=>s+v.valor,0));
-  document.getElementById('comp-semana-atual-qtd').textContent = `${sa.length} vendas`;
-  document.getElementById('comp-semana-ant').textContent = fmt(sant.reduce((s,v)=>s+v.valor,0));
-  document.getElementById('comp-semana-ant-qtd').textContent = `${sant.length} vendas`;
-
-  renderGraficoSemanas(aprovadas);
-
-  // Mês
-  renderGraficoMeses(aprovadas);
-
-  // Nível
-  const entrada = aprovadas.filter(v => v.valor <= 200);
-  const premium = aprovadas.filter(v => v.valor > 200);
-  const entVal = entrada.reduce((s,v)=>s+v.valor,0);
-  const premVal = premium.reduce((s,v)=>s+v.valor,0);
-
-  document.getElementById('comp-entrada-val').textContent = fmt(entVal);
-  document.getElementById('comp-entrada-qtd').textContent = `${entrada.length} vendas · até R$ 200`;
-  document.getElementById('comp-premium-val').textContent = fmt(premVal);
-  document.getElementById('comp-premium-qtd').textContent = `${premium.length} vendas · acima de R$ 200`;
-
-  const entProd = agruparPorProduto(entrada);
-  const premProd = agruparPorProduto(premium);
-
-  document.getElementById('comp-entrada-lista').innerHTML = Object.entries(entProd).map(([n,d]) =>
-    `<div class="produto-row"><div class="nome">${n}</div><div class="valor">${fmt(d.total)}</div></div>`
-  ).join('') || '<p style="font-size:0.78rem;color:var(--gray)">Nenhum</p>';
-
-  document.getElementById('comp-premium-lista').innerHTML = Object.entries(premProd).map(([n,d]) =>
-    `<div class="produto-row"><div class="nome">${n}</div><div class="valor">${fmt(d.total)}</div></div>`
-  ).join('') || '<p style="font-size:0.78rem;color:var(--gray)">Nenhum</p>';
-
-  destroyChart('nivel');
-  if (entVal > 0 || premVal > 0) {
-    const ctx = document.getElementById('chart-nivel').getContext('2d');
-    state.charts['nivel'] = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Entrada', 'Premium'],
-        datasets: [{ data: [entVal, premVal], backgroundColor: ['#C4A882','#8B6343'], borderWidth: 2, borderColor: '#fff' }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'right', labels: { font: { size: 12 }, color: '#6B6560' } },
-          tooltip: { callbacks: { lab
+// UTILS
+function fmt(v){return 'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(function(){t.style.display='none';},3000);}
+function addLog(msg){document.getElementById('import-log').style.display='block';document.getElementById('import-log-content').innerHTML+=msg+'<br>';}
+</script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
